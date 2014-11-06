@@ -38,8 +38,19 @@ public class MainFrame extends JFrame {
 	}
 
 	public void loadDatabase(File file) {
+		this.database = new AccountsDatabase(file);
+
+		if (this.database.isLocked()) {
+			int dialog = JOptionPane.showConfirmDialog(this, "Файл либо уже открыт, либо программа была некорректно завершена. " +
+					"Все равно открыть?", "Warning", JOptionPane.YES_NO_OPTION);
+
+			if (dialog == JOptionPane.YES_NO_OPTION) {
+				return;
+			}
+		}
+
 		try {
-			this.database = new AccountsDatabase(file);
+			this.database.open();
 		} catch (Exception e) {
 			this.showErrorMessage("Не удалось открыть файл");
 		}
@@ -47,7 +58,6 @@ public class MainFrame extends JFrame {
 		AccountsTableModel model = new AccountsTableModel(this.database);
 		System.out.println(model.getRowCount());
 		this.grid.setModel(new AccountsTableModel(this.database));
-		this.grid.repaint();
 	}
 
 	private JTable createGrid() {
@@ -250,6 +260,13 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			if (database != null) {
+				try {
+					database.close();
+				} catch (IOException e1) {
+					showErrorMessage("Не удалось закрыть файл");
+				}
+			}
 			System.exit(0);
 		}
 	}
