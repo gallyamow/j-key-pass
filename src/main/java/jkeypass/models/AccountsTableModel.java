@@ -3,18 +3,24 @@ package jkeypass.models;
 import javax.swing.table.AbstractTableModel;
 
 public class AccountsTableModel extends AbstractTableModel {
-	private AccountsDatabase database;
+	enum Column {
+		NAME("Название", "getName", false),
+		LOGIN("Логин", "getLogin", true),
+		PASSWORD("Пароль", "getPassword", true),
+		URL("URL", "getUrl", false);
 
-	private static final Column[] columns;
+		private String method;
+		private String label;
+		private boolean hidden;
 
-	static {
-		columns = new Column[]{
-				new Column("getName", "Название", false),
-				new Column("getLogin", "Логин", true),
-				new Column("getPassword", "Пароль", true),
-				new Column("getUrl", "URL", false)
-		};
+		private Column(String label, String method, boolean hidden) {
+			this.label = label;
+			this.method = method;
+			this.hidden = hidden;
+		}
 	}
+
+	private AccountsDatabase database;
 
 	public AccountsTableModel(AccountsDatabase database) {
 		this.database = database;
@@ -27,12 +33,12 @@ public class AccountsTableModel extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return AccountsTableModel.columns.length;
+		return Column.values().length;
 	}
 
 	@Override
 	public String getColumnName(int columnIndex) {
-		Column column = AccountsTableModel.columns[columnIndex];
+		Column column = Column.values()[columnIndex];
 
 		return column.label;
 	}
@@ -44,7 +50,7 @@ public class AccountsTableModel extends AbstractTableModel {
 		Object result = null;
 
 		if (account != null) {
-			Column column = AccountsTableModel.columns[columnIndex];
+			Column column = Column.values()[columnIndex];
 
 			if (column.hidden) {
 				result = "********";
@@ -58,17 +64,5 @@ public class AccountsTableModel extends AbstractTableModel {
 		}
 
 		return result;
-	}
-
-	private static class Column {
-		private Column(String method, String label, boolean hidden) {
-			this.method = method;
-			this.label = label;
-			this.hidden = hidden;
-		}
-
-		private String method;
-		private String label;
-		private boolean hidden;
 	}
 }

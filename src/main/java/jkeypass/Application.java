@@ -17,7 +17,7 @@ public class Application {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				MainFrame mainFrame = new MainFrame("j-key-pass");
+				MainFrame mainFrame = new MainFrame();
 				mainFrame.setVisible(true);
 			}
 		});

@@ -4,47 +4,45 @@ import jkeypass.models.Account;
 import jkeypass.models.AccountsDatabase;
 import jkeypass.models.AccountsTableModel;
 import jkeypass.tools.Config;
+import jkeypass.tools.Resources;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 
 public class MainFrame extends JFrame {
 	private AccountsDatabase database;
 
-	private JMenuBar menuBar;
-	private JToolBar toolBar;
 	private JTable grid;
 
-	public MainFrame(String title) {
-		super(title);
-
+	public MainFrame() {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(640, 480);
 
-		this.menuBar = this.createMenuBar();
-		setJMenuBar(this.menuBar);
+		JMenuBar menuBar = this.createMenuBar();
+		setJMenuBar(menuBar);
 
-		this.toolBar = this.createToolBar();
-
-		this.add((new JPanel(new FlowLayout(FlowLayout.LEFT))).add(this.toolBar), BorderLayout.NORTH);
+		JToolBar toolBar = this.createToolBar();
+		this.add((new JPanel(new FlowLayout(FlowLayout.LEFT))).add(toolBar), BorderLayout.NORTH);
 
 		this.grid = this.createGrid();
-
 		this.add(new JScrollPane(this.grid));
 	}
 
-	public void loadDatabase(File file) {
-		this.database = new AccountsDatabase(file);
+	public void loadDatabase(File databaseFile) {
+		this.database = new AccountsDatabase(databaseFile);
 
 		if (this.database.isLocked()) {
 			int dialog = JOptionPane.showConfirmDialog(this, "Файл либо уже открыт, либо программа была некорректно завершена. " +
 					"Все равно открыть?", "Warning", JOptionPane.YES_NO_OPTION);
 
-			if (dialog == JOptionPane.YES_NO_OPTION) {
+			if (dialog == JOptionPane.NO_OPTION) {
 				return;
 			}
 		}
@@ -52,16 +50,47 @@ public class MainFrame extends JFrame {
 		try {
 			this.database.open();
 		} catch (Exception e) {
+			e.printStackTrace();
 			this.showErrorMessage("Не удалось открыть файл");
 		}
 
-		AccountsTableModel model = new AccountsTableModel(this.database);
-		System.out.println(model.getRowCount());
 		this.grid.setModel(new AccountsTableModel(this.database));
 	}
 
+	@Override
+	public String getTitle() {
+		String title = "j-key-pass";
+
+		if (this.database != null) {
+			title += " - " + this.database.getFile().getPath();
+		}
+
+		return title;
+	}
+
 	private JTable createGrid() {
-		JTable grid = new JTable();
+		final JTable grid = new JTable();
+
+		grid.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				super.mousePressed(e);
+
+				int rowNumber = grid.rowAtPoint(e.getPoint());
+
+				ListSelectionModel model = grid.getSelectionModel();
+
+				model.setSelectionInterval(rowNumber, rowNumber);
+			}
+		});
+
+		JPopupMenu menu = new JPopupMenu();
+		menu.add(new CreateAccountAction("Добавить новую запись"));
+		menu.add(new EditAccountAction("Редактировать выбранную запись"));
+		menu.add(new RemoveAccountAction("Удалить выбранную запись"));
+
+		grid.setComponentPopupMenu(menu);
+
 		return grid;
 	}
 
@@ -110,6 +139,28 @@ public class MainFrame extends JFrame {
 		return bar;
 	}
 
+	private void openDatabase(File file) {
+		this.loadDatabase(file);
+
+		this.setTitle(this.getTitle());
+	}
+
+	private void saveDatabase() {
+		if (this.database == null) {
+			showErrorMessage("Файл базы паролей не открыт");
+		}
+
+		try {
+			this.database.save();
+		} catch (IOException e1) {
+			showErrorMessage("Не удалось записать данные в файл");
+		}
+	}
+
+	private void refreshGrid() {
+		((AbstractTableModel) grid.getModel()).fireTableDataChanged();
+	}
+
 	private void showErrorMessage(String message) {
 		JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
 		System.exit(0);
@@ -147,10 +198,12 @@ public class MainFrame extends JFrame {
 			File file = selectedFile;
 
 			if (!selectedFile.getAbsolutePath().endsWith(Config.baseExtension)) {
-				file = new File(file + "." + Config.baseExtension);
+				file = new File(selectedFile + "." + Config.baseExtension);
 			}
 
 			file.createNewFile();
+
+			openDatabase(file);
 		}
 	}
 
@@ -174,7 +227,7 @@ public class MainFrame extends JFrame {
 			int result = chooser.showOpenDialog(MainFrame.this);
 
 			if (result == JFileChooser.APPROVE_OPTION) {
-				loadDatabase(chooser.getSelectedFile());
+				openDatabase(chooser.getSelectedFile());
 			}
 		}
 	}
@@ -190,13 +243,7 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (database != null) {
-				try {
-					database.save();
-				} catch (IOException e1) {
-					showErrorMessage("Не удалось записать данные в файл");
-				}
-			}
+			saveDatabase();
 		}
 	}
 
@@ -211,7 +258,15 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			AccountDialog accountFrame = new AccountDialog(new Account(), MainFrame.this, "Новая запись");
 
+			if (accountFrame.showDialog() == AccountDialog.SAVE_OPTION) {
+				database.add(accountFrame.getAccount());
+
+				saveDatabase();
+
+				refreshGrid();
+			}
 		}
 	}
 
@@ -226,14 +281,23 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// todo: remove
-			for (int i = 0; i < 10; i++) {
-				database.add(new Account("account " + i, "login " + i, "password " + i, "url " + i, "description " + i));
+			int selectedRow = grid.getSelectedRow();
+
+			if (selectedRow == -1) {
+				return;
 			}
-			try {
-				database.save();
-			} catch (IOException e1) {
-				e1.printStackTrace();
+
+			// todo: если будет сортировка - наверно не будет совпадать
+			int index = selectedRow;
+
+			AccountDialog accountFrame = new AccountDialog(database.get(index), MainFrame.this, "Новая запись");
+
+			if (accountFrame.showDialog() == AccountDialog.SAVE_OPTION) {
+				database.update(index, accountFrame.getAccount());
+
+				saveDatabase();
+
+				refreshGrid();
 			}
 		}
 	}
@@ -249,7 +313,16 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			int selectedRow = grid.getSelectedRow();
 
+			if (selectedRow == -1) {
+				return;
+			}
+
+			int index = selectedRow;
+			database.remove(index);
+
+			refreshGrid();
 		}
 	}
 

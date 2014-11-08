@@ -15,6 +15,10 @@ public class AccountsDatabase {
 		this.lockFile = new File(this.file.getParent(), this.file.getName() + ".lock");
 	}
 
+	public File getFile() {
+		return this.file;
+	}
+
 	public Account get(int index) {
 		return this.list.get(index);
 	}
@@ -31,7 +35,15 @@ public class AccountsDatabase {
 		this.list.set(index, account);
 	}
 
+	public void remove(int index) {
+		this.list.remove(index);
+	}
+
 	public void open() throws IOException, ClassNotFoundException {
+		if (file.length() == 0) {
+			return;
+		}
+
 		try (ObjectInputStream objectStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
 			Account account;
 

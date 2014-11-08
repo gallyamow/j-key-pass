@@ -1,4 +1,4 @@
-package jkeypass.gui;
+package jkeypass.tools;
 
 import javax.swing.*;
 import java.net.URL;
