@@ -15,24 +15,40 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainFrame extends JFrame {
+	enum Action {
+		CREATE_FILE_ACTION,
+		OPEN_FILE_ACTION,
+		SAVE_FILE_ACTION,
+		EXIT_ACTION,
+		CREATE_ACCOUNT_ACTION,
+		EDIT_ACCOUNT_ACTION,
+		REMOVE_ACCOUNT_ACTION
+	}
+
 	private AccountsDatabase database;
 
 	private JTable grid;
 
+	private Map<Action, AbstractAction> actions = new HashMap<>();
+
 	public MainFrame() {
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		this.setSize(640, 480);
+
+		this.grid = this.createGrid();
+		this.add(new JScrollPane(this.grid));
+
+		this.initActions();
 
 		JMenuBar menuBar = this.createMenuBar();
 		setJMenuBar(menuBar);
 
 		JToolBar toolBar = this.createToolBar();
 		this.add((new JPanel(new FlowLayout(FlowLayout.LEFT))).add(toolBar), BorderLayout.NORTH);
-
-		this.grid = this.createGrid();
-		this.add(new JScrollPane(this.grid));
 	}
 
 	public void loadDatabase(File databaseFile) {
@@ -78,9 +94,9 @@ public class MainFrame extends JFrame {
 
 				int rowNumber = grid.rowAtPoint(e.getPoint());
 
-				ListSelectionModel model = grid.getSelectionModel();
+				grid.getSelectionModel().setSelectionInterval(rowNumber, rowNumber);
 
-				model.setSelectionInterval(rowNumber, rowNumber);
+				refreshEnabledActions();
 			}
 		});
 
@@ -97,20 +113,23 @@ public class MainFrame extends JFrame {
 	private JMenuBar createMenuBar() {
 		JMenu fileMenu = new JMenu("Файл");
 
-		fileMenu.add(new CreateFileAction("Создать базу паролей"));
-		fileMenu.add(new OpenFileAction("Открыть базу паролей"));
-		fileMenu.add(new SaveFileAction("Сохранить базу паролей"));
+
+		fileMenu.add(this.actions.get(Action.CREATE_FILE_ACTION));
+		fileMenu.add(this.actions.get(Action.OPEN_FILE_ACTION));
+		fileMenu.add(this.actions.get(Action.SAVE_FILE_ACTION));
+
 		fileMenu.addSeparator();
 
 		fileMenu.add(new JMenuItem("Изменить основной пароль"));
 		fileMenu.addSeparator();
 
-		fileMenu.add(new ExitAction("Выйти из программы"));
+		fileMenu.add(this.actions.get(Action.EXIT_ACTION));
 
 		JMenu accountsMenu = new JMenu("Записи");
-		accountsMenu.add(new CreateAccountAction("Добавить новую запись"));
-		accountsMenu.add(new EditAccountAction("Редактировать выбранную запись"));
-		accountsMenu.add(new RemoveAccountAction("Удалить выбранную запись"));
+
+		accountsMenu.add(this.actions.get(Action.CREATE_ACCOUNT_ACTION));
+		accountsMenu.add(this.actions.get(Action.EDIT_ACCOUNT_ACTION));
+		accountsMenu.add(this.actions.get(Action.REMOVE_ACCOUNT_ACTION));
 		accountsMenu.addSeparator();
 
 		JMenuBar bar = new JMenuBar();
@@ -121,28 +140,69 @@ public class MainFrame extends JFrame {
 	}
 
 	private JToolBar createToolBar() {
-		Resources resources = new Resources();
-
 		JToolBar bar = new JToolBar();
 		bar.setFloatable(false);
 
-		bar.add(new CreateFileAction("Создать базу паролей", resources.getIcon("create-file.png")));
-		bar.add(new OpenFileAction("Открыть базу паролей", resources.getIcon("open-file.png")));
-		bar.add(new SaveFileAction("Сохранить базу паролей", resources.getIcon("save-file.png")));
+		bar.add(this.actions.get(Action.CREATE_FILE_ACTION));
+		bar.add(this.actions.get(Action.OPEN_FILE_ACTION));
+		bar.add(this.actions.get(Action.SAVE_FILE_ACTION));
 
 		bar.addSeparator();
 
-		bar.add(new CreateAccountAction("Добавить новую запись", resources.getIcon("create-account.png")));
-		bar.add(new EditAccountAction("Редактировать выбранную запись", resources.getIcon("edit-account.png")));
-		bar.add(new RemoveAccountAction("Удалить выбранную запись", resources.getIcon("remove-account.png")));
+		bar.add(this.actions.get(Action.CREATE_ACCOUNT_ACTION));
+		bar.add(this.actions.get(Action.EDIT_ACCOUNT_ACTION));
+		bar.add(this.actions.get(Action.REMOVE_ACCOUNT_ACTION));
 
 		return bar;
+	}
+
+	private void initActions() {
+		Resources resources = new Resources();
+
+		this.actions.put(Action.CREATE_FILE_ACTION, new CreateFileAction("Создать базу паролей", resources.getIcon("create-file.png")));
+		this.actions.put(Action.OPEN_FILE_ACTION, new OpenFileAction("Открыть базу паролей", resources.getIcon("open-file.png")));
+		this.actions.put(Action.SAVE_FILE_ACTION, new SaveFileAction("Сохранить базу паролей", resources.getIcon("save-file.png")));
+
+		this.actions.put(Action.EXIT_ACTION, new ExitAction("Закрыть программу"));
+
+		this.actions.put(Action.CREATE_ACCOUNT_ACTION, new CreateAccountAction("Добавить новую запись", resources.getIcon("create-account.png")));
+		this.actions.put(Action.EDIT_ACCOUNT_ACTION, new EditAccountAction("Редактировать выбранную запись", resources.getIcon("edit-account.png")));
+		this.actions.put(Action.REMOVE_ACCOUNT_ACTION, new RemoveAccountAction("Удалить выбранную запись", resources.getIcon("remove-account.png")));
+
+		this.refreshEnabledActions();
+	}
+
+	private void refreshEnabledActions() {
+		boolean fileOpened = this.database != null && this.database.getFile() != null;
+		boolean rowSelected = this.grid.getSelectedRow() != -1;
+
+		if (fileOpened) {
+			this.actions.get(Action.SAVE_FILE_ACTION).setEnabled(true);
+		} else {
+			this.actions.get(Action.SAVE_FILE_ACTION).setEnabled(false);
+		}
+
+		if (fileOpened) {
+			this.actions.get(Action.CREATE_ACCOUNT_ACTION).setEnabled(true);
+		} else {
+			this.actions.get(Action.CREATE_ACCOUNT_ACTION).setEnabled(false);
+		}
+
+		if (fileOpened && rowSelected) {
+			this.actions.get(Action.EDIT_ACCOUNT_ACTION).setEnabled(true);
+			this.actions.get(Action.REMOVE_ACCOUNT_ACTION).setEnabled(true);
+		} else {
+			this.actions.get(Action.EDIT_ACCOUNT_ACTION).setEnabled(false);
+			this.actions.get(Action.REMOVE_ACCOUNT_ACTION).setEnabled(false);
+		}
 	}
 
 	private void openDatabase(File file) {
 		this.loadDatabase(file);
 
 		this.setTitle(this.getTitle());
+
+		this.refreshEnabledActions();
 	}
 
 	private void saveDatabase() {
@@ -167,10 +227,6 @@ public class MainFrame extends JFrame {
 	}
 
 	private class CreateFileAction extends AbstractAction {
-		private CreateFileAction(String name) {
-			super(name);
-		}
-
 		private CreateFileAction(String name, Icon icon) {
 			super(name, icon);
 		}
@@ -201,17 +257,13 @@ public class MainFrame extends JFrame {
 				file = new File(selectedFile + "." + Config.baseExtension);
 			}
 
-			file.createNewFile();
-
-			openDatabase(file);
+			if (file.createNewFile()) {
+				openDatabase(file);
+			}
 		}
 	}
 
 	private class OpenFileAction extends AbstractAction {
-		private OpenFileAction(String name) {
-			super(name);
-		}
-
 		private OpenFileAction(String name, Icon icon) {
 			super(name, icon);
 		}
@@ -233,10 +285,6 @@ public class MainFrame extends JFrame {
 	}
 
 	private class SaveFileAction extends AbstractAction {
-		public SaveFileAction(String name) {
-			super(name);
-		}
-
 		public SaveFileAction(String name, Icon icon) {
 			super(name, icon);
 		}
@@ -266,6 +314,7 @@ public class MainFrame extends JFrame {
 				saveDatabase();
 
 				refreshGrid();
+				refreshEnabledActions();
 			}
 		}
 	}
@@ -290,7 +339,7 @@ public class MainFrame extends JFrame {
 			// todo: если будет сортировка - наверно не будет совпадать
 			int index = selectedRow;
 
-			AccountDialog accountFrame = new AccountDialog(database.get(index), MainFrame.this, "Новая запись");
+			AccountDialog accountFrame = new AccountDialog(database.get(index), MainFrame.this, "Редактирование записи");
 
 			if (accountFrame.showDialog() == AccountDialog.SAVE_OPTION) {
 				database.update(index, accountFrame.getAccount());
@@ -298,6 +347,7 @@ public class MainFrame extends JFrame {
 				saveDatabase();
 
 				refreshGrid();
+				refreshEnabledActions();
 			}
 		}
 	}
@@ -319,10 +369,10 @@ public class MainFrame extends JFrame {
 				return;
 			}
 
-			int index = selectedRow;
-			database.remove(index);
+			database.remove(selectedRow);
 
 			refreshGrid();
+			refreshEnabledActions();
 		}
 	}
 

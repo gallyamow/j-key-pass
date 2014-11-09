@@ -32,7 +32,7 @@ public class AccountEditorPanel extends JPanel {
 	}
 
 	private Account account;
-	private Map<Field, JComponent> fieldMap = new HashMap<Field, JComponent>();
+	private Map<Field, JComponent> fieldMap = new HashMap<>();
 
 	private static final Insets WEST_INSETS = new Insets(5, 0, 5, 5);
 	private static final Insets EAST_INSETS = new Insets(5, 5, 5, 0);
@@ -65,8 +65,6 @@ public class AccountEditorPanel extends JPanel {
 		this.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createTitledBorder("Аккаунт"),
 				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-
-		GridBagConstraints gbc;
 
 		int i = 0;
 

@@ -8,7 +8,7 @@ public class AccountsDatabase {
 	private File lockFile;
 	private boolean open = false;
 
-	private ArrayList<Account> list = new ArrayList<Account>();
+	private ArrayList<Account> list = new ArrayList<>();
 
 	public AccountsDatabase(File file) {
 		this.file = file;
