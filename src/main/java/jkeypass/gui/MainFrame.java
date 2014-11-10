@@ -3,6 +3,7 @@ package jkeypass.gui;
 import jkeypass.models.Account;
 import jkeypass.models.AccountsDatabase;
 import jkeypass.models.AccountsTableModel;
+import jkeypass.models.Settings;
 import jkeypass.tools.Config;
 import jkeypass.tools.Resources;
 
@@ -23,10 +24,13 @@ public class MainFrame extends JFrame {
 		CREATE_FILE_ACTION,
 		OPEN_FILE_ACTION,
 		SAVE_FILE_ACTION,
-		EXIT_ACTION,
+
 		CREATE_ACCOUNT_ACTION,
 		EDIT_ACCOUNT_ACTION,
-		REMOVE_ACCOUNT_ACTION
+		REMOVE_ACCOUNT_ACTION,
+
+		SETTINGS_ACTION,
+		EXIT_ACTION
 	}
 
 	private AccountsDatabase database;
@@ -37,7 +41,10 @@ public class MainFrame extends JFrame {
 
 	public MainFrame() {
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+
 		this.setSize(640, 480);
+
+		this.applySettings();
 
 		this.grid = this.createGrid();
 		this.add(new JScrollPane(this.grid));
@@ -120,6 +127,7 @@ public class MainFrame extends JFrame {
 
 		fileMenu.addSeparator();
 
+		fileMenu.add(this.actions.get(Action.SETTINGS_ACTION));
 		fileMenu.add(new JMenuItem("Изменить основной пароль"));
 		fileMenu.addSeparator();
 
@@ -163,11 +171,12 @@ public class MainFrame extends JFrame {
 		this.actions.put(Action.OPEN_FILE_ACTION, new OpenFileAction("Открыть базу паролей", resources.getIcon("open-file.png")));
 		this.actions.put(Action.SAVE_FILE_ACTION, new SaveFileAction("Сохранить базу паролей", resources.getIcon("save-file.png")));
 
-		this.actions.put(Action.EXIT_ACTION, new ExitAction("Закрыть программу"));
-
 		this.actions.put(Action.CREATE_ACCOUNT_ACTION, new CreateAccountAction("Добавить новую запись", resources.getIcon("create-account.png")));
 		this.actions.put(Action.EDIT_ACCOUNT_ACTION, new EditAccountAction("Редактировать выбранную запись", resources.getIcon("edit-account.png")));
 		this.actions.put(Action.REMOVE_ACCOUNT_ACTION, new RemoveAccountAction("Удалить выбранную запись", resources.getIcon("remove-account.png")));
+
+		this.actions.put(Action.EXIT_ACTION, new ExitAction("Закрыть программу"));
+		this.actions.put(Action.SETTINGS_ACTION, new SettingsAction("Настройки"));
 
 		this.refreshEnabledActions();
 	}
@@ -178,13 +187,9 @@ public class MainFrame extends JFrame {
 
 		if (fileOpened) {
 			this.actions.get(Action.SAVE_FILE_ACTION).setEnabled(true);
-		} else {
-			this.actions.get(Action.SAVE_FILE_ACTION).setEnabled(false);
-		}
-
-		if (fileOpened) {
 			this.actions.get(Action.CREATE_ACCOUNT_ACTION).setEnabled(true);
 		} else {
+			this.actions.get(Action.SAVE_FILE_ACTION).setEnabled(false);
 			this.actions.get(Action.CREATE_ACCOUNT_ACTION).setEnabled(false);
 		}
 
@@ -219,6 +224,17 @@ public class MainFrame extends JFrame {
 
 	private void refreshGrid() {
 		((AbstractTableModel) grid.getModel()).fireTableDataChanged();
+	}
+
+	private void applySettings() {
+		Settings settings = new Settings();
+
+		try {
+			UIManager.setLookAndFeel(settings.getTheme());
+			SwingUtilities.updateComponentTreeUI(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void showErrorMessage(String message) {
@@ -349,6 +365,7 @@ public class MainFrame extends JFrame {
 				refreshGrid();
 				refreshEnabledActions();
 			}
+			System.out.println("222");
 		}
 	}
 
@@ -373,6 +390,21 @@ public class MainFrame extends JFrame {
 
 			refreshGrid();
 			refreshEnabledActions();
+		}
+	}
+
+	private class SettingsAction extends AbstractAction {
+		public SettingsAction(String name) {
+			super(name);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			SettingsDialog settingsDialog = new SettingsDialog(MainFrame.this, "Настройки");
+
+			if (settingsDialog.showDialog() == SettingsDialog.SAVE_OPTION) {
+				applySettings();
+			}
 		}
 	}
 
