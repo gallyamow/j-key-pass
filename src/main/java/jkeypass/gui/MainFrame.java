@@ -11,6 +11,8 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +40,15 @@ public class MainFrame extends JFrame {
 	private Map<Action, AbstractAction> actions = new HashMap<>();
 
 	public MainFrame() {
-		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				super.windowClosing(e);
+				close();
+			}
+		});
 
 		this.setSize(640, 480);
 
@@ -72,7 +82,7 @@ public class MainFrame extends JFrame {
 			this.database.open();
 		} catch (Exception e) {
 			e.printStackTrace();
-			this.showErrorMessage("Не удалось открыть файл");
+			this.showError("Не удалось открыть файл");
 		}
 
 		this.grid.setModel(new AccountsTableModel(this.database));
@@ -97,11 +107,81 @@ public class MainFrame extends JFrame {
 			public void mousePressed(MouseEvent e) {
 				super.mousePressed(e);
 
-				int rowNumber = grid.rowAtPoint(e.getPoint());
+				int rowIndex = this.getRowIndex(e);
 
-				grid.getSelectionModel().setSelectionInterval(rowNumber, rowNumber);
+				if (rowIndex == -1) {
+					return;
+				}
+
+				grid.getSelectionModel().setSelectionInterval(rowIndex, rowIndex);
 
 				refreshEnabledActions();
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				super.mouseClicked(e);
+
+				if (e.getClickCount() == 2) {
+					int rowIndex = this.getRowIndex(e);
+					if (rowIndex == -1) {
+						return;
+					}
+
+					int columnIndex = this.getColumnIndex(e);
+					if (columnIndex == -1) {
+						return;
+					}
+
+					int index = ((AccountsTableModel) grid.getModel()).getDatabaseIndexByRowIndex(rowIndex);
+
+					Account account = database.get(index);
+
+					AccountsTableModel.Column column = AccountsTableModel.Column.values()[columnIndex];
+
+					String value = null;
+
+					if (column == AccountsTableModel.Column.LOGIN) {
+						value = account.getLogin();
+					} else if (column == AccountsTableModel.Column.PASSWORD) {
+						value = account.getPassword();
+					} else if (column == AccountsTableModel.Column.URL) {
+						value = account.getUrl();
+					}
+
+					if (value != null) {
+						if (column == AccountsTableModel.Column.URL) {
+							if (java.awt.Desktop.isDesktopSupported()) {
+								java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
+
+								if (desktop.isSupported(java.awt.Desktop.Action.BROWSE)) {
+									try {
+										java.net.URI uri = new java.net.URI(value);
+										desktop.browse(uri);
+									} catch (Exception ex) {
+										showWarning("Неправильный URL");
+									}
+								}
+							}
+						} else {
+							try {
+								StringSelection selection = new StringSelection(value);
+								Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+								clipboard.setContents(selection, selection);
+							} catch (Exception ex) {
+								showWarning("Буфер обмена недоступен");
+							}
+						}
+					}
+				}
+			}
+
+			private int getRowIndex(MouseEvent e) {
+				return grid.rowAtPoint(e.getPoint());
+			}
+
+			private int getColumnIndex(MouseEvent e) {
+				return grid.columnAtPoint(e.getPoint());
 			}
 		});
 
@@ -230,13 +310,23 @@ public class MainFrame extends JFrame {
 
 	private void saveDatabase() {
 		if (this.database == null) {
-			showErrorMessage("Файл базы паролей не открыт");
+			showError("Файл базы паролей не открыт");
 		}
 
 		try {
 			this.database.save();
 		} catch (IOException e1) {
-			showErrorMessage("Не удалось записать данные в файл");
+			showError("Не удалось записать данные в файл");
+		}
+	}
+
+	private void close() {
+		if (database != null) {
+			try {
+				database.close();
+			} catch (IOException e) {
+				showError("Не удалось закрыть файл");
+			}
 		}
 	}
 
@@ -255,8 +345,13 @@ public class MainFrame extends JFrame {
 		}
 	}
 
-	private void showErrorMessage(String message) {
+	private void showError(String message) {
 		JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+		System.exit(0);
+	}
+
+	private void showWarning(String message) {
+		JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
 		System.exit(0);
 	}
 
@@ -279,7 +374,7 @@ public class MainFrame extends JFrame {
 				try {
 					this.createNewFile(chooser.getSelectedFile());
 				} catch (IOException ex) {
-					showErrorMessage("Не удалось сохранить файл");
+					showError("Не удалось сохранить файл");
 				}
 			}
 		}
@@ -370,8 +465,7 @@ public class MainFrame extends JFrame {
 				return;
 			}
 
-			// todo: если будет сортировка - наверно не будет совпадать
-			int index = selectedRow;
+			int index = ((AccountsTableModel) grid.getModel()).getDatabaseIndexByRowIndex(selectedRow);
 
 			AccountDialog accountFrame = new AccountDialog(database.get(index), MainFrame.this, "Редактирование записи");
 
@@ -383,7 +477,6 @@ public class MainFrame extends JFrame {
 				refreshGrid();
 				refreshEnabledActions();
 			}
-			System.out.println("222");
 		}
 	}
 
@@ -404,7 +497,9 @@ public class MainFrame extends JFrame {
 				return;
 			}
 
-			database.remove(selectedRow);
+			int index = ((AccountsTableModel) grid.getModel()).getDatabaseIndexByRowIndex(selectedRow);
+
+			database.remove(index);
 
 			refreshGrid();
 			refreshEnabledActions();
@@ -412,10 +507,6 @@ public class MainFrame extends JFrame {
 	}
 
 	private class SettingsAction extends AbstractAction {
-		public SettingsAction(String name) {
-			super(name);
-		}
-
 		public SettingsAction(String name, Icon icon) {
 			super(name, icon);
 		}
@@ -431,23 +522,14 @@ public class MainFrame extends JFrame {
 	}
 
 	private class ExitAction extends AbstractAction {
-		public ExitAction(String name) {
-			super(name);
-		}
-
 		public ExitAction(String name, Icon icon) {
 			super(name, icon);
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (database != null) {
-				try {
-					database.close();
-				} catch (IOException e1) {
-					showErrorMessage("Не удалось закрыть файл");
-				}
-			}
+			close();
+
 			System.exit(0);
 		}
 	}

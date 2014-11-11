@@ -3,7 +3,7 @@ package jkeypass.models;
 import javax.swing.table.AbstractTableModel;
 
 public class AccountsTableModel extends AbstractTableModel {
-	enum Column {
+	public enum Column {
 		NAME("Название", "getName", false),
 		LOGIN("Логин", "getLogin", true),
 		PASSWORD("Пароль", "getPassword", true),
@@ -24,6 +24,10 @@ public class AccountsTableModel extends AbstractTableModel {
 
 	public AccountsTableModel(AccountsDatabase database) {
 		this.database = database;
+	}
+
+	public int getDatabaseIndexByRowIndex(int rowIndex) {
+		return rowIndex;
 	}
 
 	@Override
