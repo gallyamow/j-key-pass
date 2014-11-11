@@ -11,9 +11,7 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -51,7 +49,7 @@ public class MainFrame extends JFrame {
 
 		this.initActions();
 
-		JMenuBar menuBar = this.createMenuBar();
+		JMenuBar menuBar = this.createMenu();
 		setJMenuBar(menuBar);
 
 		JToolBar toolBar = this.createToolBar();
@@ -117,25 +115,39 @@ public class MainFrame extends JFrame {
 		return grid;
 	}
 
-	private JMenuBar createMenuBar() {
+	private JMenuBar createMenu() {
 		JMenu fileMenu = new JMenu("Файл");
 
+		JMenuItem item;
 
-		fileMenu.add(this.actions.get(Action.CREATE_FILE_ACTION));
-		fileMenu.add(this.actions.get(Action.OPEN_FILE_ACTION));
-		fileMenu.add(this.actions.get(Action.SAVE_FILE_ACTION));
+		item = new JMenuItem(this.actions.get(Action.CREATE_FILE_ACTION));
+		item.setAccelerator(KeyStroke.getKeyStroke("ctrl N"));
+		fileMenu.add(item);
+
+		item = new JMenuItem(this.actions.get(Action.OPEN_FILE_ACTION));
+		item.setAccelerator(KeyStroke.getKeyStroke("ctrl O"));
+		fileMenu.add(item);
+
+		item = new JMenuItem(this.actions.get(Action.SAVE_FILE_ACTION));
+		item.setAccelerator(KeyStroke.getKeyStroke("ctrl S"));
+		fileMenu.add(item);
 
 		fileMenu.addSeparator();
 
 		fileMenu.add(this.actions.get(Action.SETTINGS_ACTION));
-		fileMenu.add(new JMenuItem("Изменить основной пароль"));
+
 		fileMenu.addSeparator();
 
-		fileMenu.add(this.actions.get(Action.EXIT_ACTION));
+		item = new JMenuItem(this.actions.get(Action.EXIT_ACTION));
+		item.setAccelerator(KeyStroke.getKeyStroke("ctrl Q"));
+		fileMenu.add(item);
 
 		JMenu accountsMenu = new JMenu("Записи");
 
-		accountsMenu.add(this.actions.get(Action.CREATE_ACCOUNT_ACTION));
+		item = new JMenuItem(this.actions.get(Action.CREATE_ACCOUNT_ACTION));
+		item.setAccelerator(KeyStroke.getKeyStroke("alt INSERT"));
+		accountsMenu.add(item);
+
 		accountsMenu.add(this.actions.get(Action.EDIT_ACCOUNT_ACTION));
 		accountsMenu.add(this.actions.get(Action.REMOVE_ACCOUNT_ACTION));
 		accountsMenu.addSeparator();
@@ -167,13 +179,19 @@ public class MainFrame extends JFrame {
 	private void initActions() {
 		Resources resources = new Resources();
 
-		this.actions.put(Action.CREATE_FILE_ACTION, new CreateFileAction("Создать базу паролей", resources.getIcon("create-file.png")));
-		this.actions.put(Action.OPEN_FILE_ACTION, new OpenFileAction("Открыть базу паролей", resources.getIcon("open-file.png")));
-		this.actions.put(Action.SAVE_FILE_ACTION, new SaveFileAction("Сохранить базу паролей", resources.getIcon("save-file.png")));
+		this.actions.put(Action.CREATE_FILE_ACTION, new CreateFileAction("Создать базу паролей",
+				resources.getIcon("create-file.png")));
+		this.actions.put(Action.OPEN_FILE_ACTION, new OpenFileAction("Открыть базу паролей",
+				resources.getIcon("open-file.png")));
+		this.actions.put(Action.SAVE_FILE_ACTION, new SaveFileAction("Сохранить базу паролей",
+				resources.getIcon("save-file.png")));
 
-		this.actions.put(Action.CREATE_ACCOUNT_ACTION, new CreateAccountAction("Добавить новую запись", resources.getIcon("create-account.png")));
-		this.actions.put(Action.EDIT_ACCOUNT_ACTION, new EditAccountAction("Редактировать выбранную запись", resources.getIcon("edit-account.png")));
-		this.actions.put(Action.REMOVE_ACCOUNT_ACTION, new RemoveAccountAction("Удалить выбранную запись", resources.getIcon("remove-account.png")));
+		this.actions.put(Action.CREATE_ACCOUNT_ACTION, new CreateAccountAction("Добавить новую запись",
+				resources.getIcon("create-account.png")));
+		this.actions.put(Action.EDIT_ACCOUNT_ACTION, new EditAccountAction("Редактировать выбранную запись",
+				resources.getIcon("edit-account.png")));
+		this.actions.put(Action.REMOVE_ACCOUNT_ACTION, new RemoveAccountAction("Удалить выбранную запись",
+				resources.getIcon("remove-account.png")));
 
 		this.actions.put(Action.SETTINGS_ACTION, new SettingsAction("Настройки", resources.getIcon("settings.png")));
 		this.actions.put(Action.EXIT_ACTION, new ExitAction("Закрыть программу", resources.getIcon("exit.png")));
