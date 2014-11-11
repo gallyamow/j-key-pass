@@ -175,8 +175,8 @@ public class MainFrame extends JFrame {
 		this.actions.put(Action.EDIT_ACCOUNT_ACTION, new EditAccountAction("Редактировать выбранную запись", resources.getIcon("edit-account.png")));
 		this.actions.put(Action.REMOVE_ACCOUNT_ACTION, new RemoveAccountAction("Удалить выбранную запись", resources.getIcon("remove-account.png")));
 
-		this.actions.put(Action.EXIT_ACTION, new ExitAction("Закрыть программу"));
-		this.actions.put(Action.SETTINGS_ACTION, new SettingsAction("Настройки"));
+		this.actions.put(Action.SETTINGS_ACTION, new SettingsAction("Настройки", resources.getIcon("settings.png")));
+		this.actions.put(Action.EXIT_ACTION, new ExitAction("Закрыть программу", resources.getIcon("exit.png")));
 
 		this.refreshEnabledActions();
 	}
@@ -398,6 +398,10 @@ public class MainFrame extends JFrame {
 			super(name);
 		}
 
+		public SettingsAction(String name, Icon icon) {
+			super(name, icon);
+		}
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			SettingsDialog settingsDialog = new SettingsDialog(MainFrame.this, "Настройки");
@@ -411,6 +415,10 @@ public class MainFrame extends JFrame {
 	private class ExitAction extends AbstractAction {
 		public ExitAction(String name) {
 			super(name);
+		}
+
+		public ExitAction(String name, Icon icon) {
+			super(name, icon);
 		}
 
 		@Override
