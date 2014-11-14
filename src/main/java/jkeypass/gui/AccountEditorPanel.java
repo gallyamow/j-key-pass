@@ -9,7 +9,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
@@ -111,8 +110,27 @@ public class AccountEditorPanel extends GridBagPanel {
 
 		this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), this.createGbc(0, i));
 
-		JPasswordField passwordField = new JPasswordField((String) this.getAccountProperty(field.getter), 10);
-		this.add(passwordField, this.createGbc(1, i));
+		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+
+		JPasswordField passwordField = new JPasswordField((String) this.getAccountProperty(field.getter), 30);
+		passwordPanel.add(passwordField);
+
+		JButton showPasswordButton = new JButton("Показать пароль", (new Resources()).getIcon("show-password.png"));
+		showPasswordButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JPasswordField passwordField = (JPasswordField) fieldMap.get(Field.PASSWORD);
+
+				if (passwordField.getEchoChar() == ((char) 0)) {
+					setPasswordVisiblity(passwordField, false);
+				} else {
+					setPasswordVisiblity(passwordField, true);
+				}
+			}
+		});
+
+		passwordPanel.add(showPasswordButton);
+		this.add(passwordPanel, this.createGbc(1, i));
 
 		this.fieldMap.put(field, passwordField);
 
@@ -136,7 +154,8 @@ public class AccountEditorPanel extends GridBagPanel {
 	private JPanel createPasswordGeneratorPanel() {
 		final Map<SymbolType, JCheckBox> symbolsCheckboxes = new HashMap<>();
 
-		JPanel typesPanel = new JPanel();
+		JPanel typesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+
 		for (SymbolType type : SymbolType.values()) {
 			JCheckBox checkbox = new JCheckBox(type.name, true);
 			typesPanel.add(checkbox);
@@ -144,16 +163,16 @@ public class AccountEditorPanel extends GridBagPanel {
 			symbolsCheckboxes.put(type, checkbox);
 		}
 
-		JPanel buttonsPanel = new JPanel();
+		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
 		final JSpinner lengthSpinner = new JSpinner(new SpinnerNumberModel(15, 5, 30, 1));
 		lengthSpinner.setValue(15);
 		buttonsPanel.add(lengthSpinner);
 
-		JButton button = new JButton((new Resources()).getIcon("generate-password.png"));
-		buttonsPanel.add(button);
+		JButton randPasswordButton = new JButton((new Resources()).getIcon("generate-password.png"));
+		buttonsPanel.add(randPasswordButton);
 
-		button.addActionListener(new ActionListener() {
+		randPasswordButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				StringBuilder sb = new StringBuilder();
@@ -179,7 +198,8 @@ public class AccountEditorPanel extends GridBagPanel {
 					String password = sb.toString();
 
 					JPasswordField passwordField = (JPasswordField) fieldMap.get(Field.PASSWORD);
-					passwordField.setEchoChar((char) 0); // для показа пароля
+
+					setPasswordVisiblity(passwordField, true);
 					passwordField.setText(password);
 				}
 			}
@@ -210,6 +230,14 @@ public class AccountEditorPanel extends GridBagPanel {
 			Account.class.getMethod(setter, value.getClass()).invoke(this.account, value);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void setPasswordVisiblity(JPasswordField passwordField, boolean visibility) {
+		if (visibility) {
+			passwordField.setEchoChar((char) 0);
+		} else {
+			passwordField.setEchoChar('*');
 		}
 	}
 }
