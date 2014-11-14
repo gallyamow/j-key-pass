@@ -1,12 +1,17 @@
 package jkeypass.gui;
 
 import jkeypass.models.Account;
+import jkeypass.tools.Resources;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 public class AccountEditorPanel extends GridBagPanel {
 	enum Field {
@@ -28,6 +33,29 @@ public class AccountEditorPanel extends GridBagPanel {
 
 		public String getLabel() {
 			return this.label;
+		}
+	}
+
+	enum SymbolType {
+		UPPERCASE("Прописные буквы", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+		LOWERCASE("Строчные буквы буквы", "abcdefghijklmnopqrstuvwxyz"),
+		NUMERALS("Цифры", "0123456789"),
+		SPECIALCHARS("Специальные символы", "`~!@#$%^&*()_-+=<>.,/?|");
+
+		private String name;
+		private String symbols;
+
+		private SymbolType(String name, String symbols) {
+			this.name = name;
+			this.symbols = symbols;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public String getSymbols() {
+			return this.symbols;
 		}
 	}
 
@@ -89,6 +117,11 @@ public class AccountEditorPanel extends GridBagPanel {
 		this.fieldMap.put(field, passwordField);
 
 		i++;
+		GridBagConstraints gbc = new GridBagConstraints(0, i, 2, 1, 0.1, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 0, 5, 5), 0, 0);
+		JPanel generator = this.createPasswordGeneratorPanel();
+		this.add(generator, gbc);
+
+		i++;
 		field = Field.DESCRIPTION;
 
 		this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), this.createGbc(0, i));
@@ -98,6 +131,66 @@ public class AccountEditorPanel extends GridBagPanel {
 		this.add(new JScrollPane(textArea), this.createGbc(1, i));
 
 		this.fieldMap.put(field, textArea);
+	}
+
+	private JPanel createPasswordGeneratorPanel() {
+		final Map<SymbolType, JCheckBox> symbolsCheckboxes = new HashMap<>();
+
+		JPanel typesPanel = new JPanel();
+		for (SymbolType type : SymbolType.values()) {
+			JCheckBox checkbox = new JCheckBox(type.name, true);
+			typesPanel.add(checkbox);
+
+			symbolsCheckboxes.put(type, checkbox);
+		}
+
+		JPanel buttonsPanel = new JPanel();
+
+		final JSpinner lengthSpinner = new JSpinner(new SpinnerNumberModel(15, 5, 30, 1));
+		lengthSpinner.setValue(15);
+		buttonsPanel.add(lengthSpinner);
+
+		JButton button = new JButton((new Resources()).getIcon("generate-password.png"));
+		buttonsPanel.add(button);
+
+		button.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				StringBuilder sb = new StringBuilder();
+
+				for (SymbolType type : SymbolType.values()) {
+					JCheckBox checkbox = symbolsCheckboxes.get(type);
+
+					if (checkbox.isSelected()) {
+						sb.append(type.getSymbols());
+					}
+				}
+
+				char[] symbols = sb.toString().toCharArray();
+
+				sb = new StringBuilder();
+				Random rand = new Random();
+
+				if (symbols.length > 0) {
+					for (int i = 0; i < (int) lengthSpinner.getValue(); i++) {
+						sb.append(symbols[rand.nextInt(symbols.length)]);
+					}
+
+					String password = sb.toString();
+
+					JPasswordField passwordField = (JPasswordField) fieldMap.get(Field.PASSWORD);
+					passwordField.setEchoChar((char) 0); // для показа пароля
+					passwordField.setText(password);
+				}
+			}
+		});
+
+		JPanel panel = new JPanel(new GridLayout(2, 1));
+
+		panel.add(typesPanel);
+		panel.add(buttonsPanel);
+
+		return panel;
 	}
 
 	private Object getAccountProperty(String getter) {

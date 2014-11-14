@@ -51,19 +51,23 @@ public class AccountsTableModel extends AbstractTableModel {
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		Account account = this.database.get(rowIndex);
 
-		Object result = null;
+		String result = null;
 
 		if (account != null) {
 			Column column = Column.values()[columnIndex];
 
-			if (column.hidden) {
-				result = "********";
+			String value = "";
+
+			try {
+				value = (String) Account.class.getMethod(column.method).invoke(account);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			if (column.hidden && value.length() > 0) {
+				result = "*********";
 			} else {
-				try {
-					result = Account.class.getMethod(column.method).invoke(account);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				result = value;
 			}
 		}
 

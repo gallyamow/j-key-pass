@@ -102,6 +102,8 @@ public class MainFrame extends JFrame {
 	private JTable createGrid() {
 		final JTable grid = new JTable();
 
+		grid.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
 		grid.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
