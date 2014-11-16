@@ -1,7 +1,7 @@
 package jkeypass.gui;
 
 import jkeypass.models.Account;
-import jkeypass.tools.Resources;
+import jkeypass.common.Resources;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -62,9 +62,9 @@ public class AccountEditorPanel extends GridBagPanel {
 	private Map<Field, JComponent> fieldMap = new HashMap<>();
 
 	public AccountEditorPanel(Account account) {
-		this.account = account;
+		super();
 
-		this.setLayout(new GridBagLayout());
+		this.account = account;
 
 		this.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createTitledBorder("Аккаунт"),
@@ -169,7 +169,7 @@ public class AccountEditorPanel extends GridBagPanel {
 		lengthSpinner.setValue(15);
 		buttonsPanel.add(lengthSpinner);
 
-		JButton randPasswordButton = new JButton((new Resources()).getIcon("generate-password.png"));
+		JButton randPasswordButton = new JButton("Генерировать пароль", (new Resources()).getIcon("generate-password.png"));
 		buttonsPanel.add(randPasswordButton);
 
 		randPasswordButton.addActionListener(new ActionListener() {

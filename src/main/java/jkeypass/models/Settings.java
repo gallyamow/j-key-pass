@@ -1,11 +1,14 @@
 package jkeypass.models;
 
+import jkeypass.sync.Sync;
+
 import javax.swing.*;
 import java.util.prefs.Preferences;
 
-public class Settings {
+public class Settings implements jkeypass.common.Settings {
 	public enum Options {
-		THEME("Тема", "theme");
+		THEME("Тема", "theme"),
+		SYNC_METHOD("Синхронизация", "method");
 
 		private String label;
 		private String key;
@@ -25,6 +28,7 @@ public class Settings {
 	}
 
 	private String theme;
+	private String syncMethod;
 
 	private Preferences preferences;
 
@@ -35,7 +39,8 @@ public class Settings {
 	}
 
 	public void save() {
-		this.preferences.put(Options.THEME.getKey(), this.theme);
+		this.preferences.put(Options.THEME.getKey(), this.getTheme());
+		this.preferences.put(Options.SYNC_METHOD.getKey(), this.getSyncMethod());
 	}
 
 	public void setTheme(String theme) {
@@ -46,7 +51,16 @@ public class Settings {
 		return this.theme;
 	}
 
+	public void setSyncMethod(String syncMethod) {
+		this.syncMethod = syncMethod;
+	}
+
+	public String getSyncMethod() {
+		return syncMethod;
+	}
+
 	private void initParams() {
-		this.theme = this.preferences.get(Options.THEME.getKey(), UIManager.getSystemLookAndFeelClassName());
+		this.setTheme(this.preferences.get(Options.THEME.getKey(), UIManager.getSystemLookAndFeelClassName()));
+		this.setSyncMethod(this.preferences.get(Options.SYNC_METHOD.getKey(), Sync.Method.NOSYNC.getName()));
 	}
 }

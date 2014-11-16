@@ -18,6 +18,8 @@ public class AccountDialog extends JDialog {
 	public AccountDialog(Account account, Frame owner, String title) {
 		super(owner, title, true);
 
+		this.setLocationByPlatform(true);
+		
 		this.panel = new AccountEditorPanel(account);
 		this.add(this.panel);
 

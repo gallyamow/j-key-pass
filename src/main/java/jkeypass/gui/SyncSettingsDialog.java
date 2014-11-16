@@ -1,29 +1,31 @@
 package jkeypass.gui;
 
-import jkeypass.models.Settings;
+import jkeypass.common.Settings;
+import jkeypass.sync.Sync;
+import jkeypass.common.SettingsPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class SettingsDialog extends JDialog {
+public class SyncSettingsDialog extends JDialog {
 	public static final int CANCEL_OPTION = 0;
 	public static final int SAVE_OPTION = 1;
 
 	private int result = CANCEL_OPTION;
 
 	private Settings settings;
-
 	private SettingsPanel panel;
 
-	public SettingsDialog(Frame owner, String title) {
-		super(owner, title, true);
+	public SyncSettingsDialog(Dialog owner, Sync.Method method) {
+		super(owner, "Настройки синхронизации", true);
 
-		this.settings = new Settings();
+		this.settings = Sync.getSettings(method);
 
-		this.panel = new SettingsPanel(this.settings);
-		this.add(this.panel);
+		this.panel = Sync.getSettingsPanel(method, settings);
+
+		this.add((JComponent) this.panel);
 
 		this.add(this.createButtons(), BorderLayout.SOUTH);
 
@@ -39,6 +41,7 @@ public class SettingsDialog extends JDialog {
 
 	private void save() {
 		this.settings = this.panel.getUpdatedSettings();
+
 		this.settings.save();
 	}
 

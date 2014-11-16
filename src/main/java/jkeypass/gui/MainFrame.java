@@ -4,8 +4,8 @@ import jkeypass.models.Account;
 import jkeypass.models.AccountsDatabase;
 import jkeypass.models.AccountsTableModel;
 import jkeypass.models.Settings;
-import jkeypass.tools.Config;
-import jkeypass.tools.Resources;
+import jkeypass.common.Config;
+import jkeypass.common.Resources;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -230,8 +230,14 @@ public class MainFrame extends JFrame {
 		item.setAccelerator(KeyStroke.getKeyStroke("alt INSERT"));
 		accountsMenu.add(item);
 
-		accountsMenu.add(this.actions.get(Action.EDIT_ACCOUNT_ACTION));
-		accountsMenu.add(this.actions.get(Action.REMOVE_ACCOUNT_ACTION));
+		item = new JMenuItem(this.actions.get(Action.EDIT_ACCOUNT_ACTION));
+		item.setAccelerator(KeyStroke.getKeyStroke("ctrl E"));
+		accountsMenu.add(item);
+
+		item = new JMenuItem(this.actions.get(Action.REMOVE_ACCOUNT_ACTION));
+		item.setAccelerator(KeyStroke.getKeyStroke("ctrl D"));
+		accountsMenu.add(item);
+
 		accountsMenu.addSeparator();
 
 		JMenuBar bar = new JMenuBar();
@@ -516,6 +522,7 @@ public class MainFrame extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			SettingsDialog settingsDialog = new SettingsDialog(MainFrame.this, "Настройки");
+			settingsDialog.setLocationRelativeTo(MainFrame.this);
 
 			if (settingsDialog.showDialog() == SettingsDialog.SAVE_OPTION) {
 				applySettings();
