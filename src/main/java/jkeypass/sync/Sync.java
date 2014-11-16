@@ -2,6 +2,7 @@ package jkeypass.sync;
 
 import jkeypass.common.Settings;
 import jkeypass.common.SettingsPanel;
+import jkeypass.sync.dropbox.DropboxSynchronizer;
 import jkeypass.sync.dropbox.gui.DropboxSettingsPanel;
 import jkeypass.sync.dropbox.models.DropboxSettings;
 
@@ -26,13 +27,37 @@ public class Sync {
 			return name;
 		}
 
+		public static Method getByName(String name) {
+			for (Method method : values()) {
+				if (method.getName().equals(name)) {
+					return method;
+				}
+			}
+
+			return null;
+		}
+
 		@Override
 		public String toString() {
 			return this.getLabel();
 		}
 	}
 
-	public static Settings getSettings(Method method) {
+	public static Synchronizer getSynchronizer(String methodName) {
+		Method method = Method.getByName(methodName);
+
+		switch (method) {
+			case DROPBOX:
+				DropboxSettings settings = new DropboxSettings();
+				return new DropboxSynchronizer(settings.getKey(), settings.getSecret(), settings.getToken());
+		}
+
+		return null;
+	}
+
+	public static Settings getSettings(String methodName) {
+		Method method = Method.getByName(methodName);
+
 		switch (method) {
 			case DROPBOX:
 				return new DropboxSettings();
@@ -41,7 +66,9 @@ public class Sync {
 		return null;
 	}
 
-	public static SettingsPanel getSettingsPanel(Method method, Settings settings) {
+	public static SettingsPanel getSettingsPanel(String methodName, Settings settings) {
+		Method method = Method.getByName(methodName);
+
 		switch (method) {
 			case DROPBOX:
 				return new DropboxSettingsPanel(settings);

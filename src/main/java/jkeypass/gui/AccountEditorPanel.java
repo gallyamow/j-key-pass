@@ -1,7 +1,7 @@
 package jkeypass.gui;
 
-import jkeypass.models.Account;
 import jkeypass.common.Resources;
+import jkeypass.models.Account;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;

@@ -1,6 +1,10 @@
 package jkeypass.sync;
 
+import java.io.File;
+import java.io.IOException;
+
 public interface Synchronizer {
-	public boolean save();
-	public Object load();
+	public void save(File databaseFile) throws SyncException;
+
+	public File load(File databaseFile) throws SyncException;
 }

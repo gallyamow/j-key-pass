@@ -1,5 +1,7 @@
 package jkeypass.models;
 
+import jkeypass.sync.SyncException;
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -39,33 +41,35 @@ public class AccountsDatabase {
 		this.list.remove(index);
 	}
 
-	public void open() throws IOException, ClassNotFoundException {
-		if (file.length() == 0) {
-			return;
-		}
-
-		try (ObjectInputStream objectStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
-			Account account;
-
-			try {
-				while ((account = (Account) objectStream.readObject()) != null) {
-					this.add(account);
-				}
-			} catch (IOException e) {
-				// todo: обработать
-			}
-
-			objectStream.close();
-
-			this.lock();
-			this.open = true;
-		}
+	public boolean isOpen() {
+		return open;
 	}
 
-	public void save() throws IOException {
+	public void open() throws IOException, ClassNotFoundException {
+		if (file.length() > 0) {
+			try (ObjectInputStream objectStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(this.file)))) {
+				Account account;
+
+				try {
+					while ((account = (Account) objectStream.readObject()) != null) {
+						this.add(account);
+					}
+				} catch (IOException e) {
+					// e.printStackTrace(); todo: корректно обработать
+				}
+
+				objectStream.close();
+			}
+		}
+
+		this.lock();
+		this.open = true;
+	}
+
+	public void save() throws IOException, SyncException {
 		if (this.open) {
 			// очистка произойдет автоматически, так как FileOutputStream сконструирован с append = false
-			try (ObjectOutputStream objectStream = new ObjectOutputStream(new FileOutputStream(file))) {
+			try (ObjectOutputStream objectStream = new ObjectOutputStream(new FileOutputStream(this.file))) {
 				for (Account account : this.list) {
 					objectStream.writeObject(account);
 				}
@@ -75,7 +79,6 @@ public class AccountsDatabase {
 	}
 
 	public void close() throws IOException {
-		this.save();
 		this.unlock();
 	}
 

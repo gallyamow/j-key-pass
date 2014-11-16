@@ -1,11 +1,15 @@
 package jkeypass.gui;
 
+import jkeypass.common.Config;
+import jkeypass.common.Resources;
 import jkeypass.models.Account;
 import jkeypass.models.AccountsDatabase;
 import jkeypass.models.AccountsTableModel;
 import jkeypass.models.Settings;
-import jkeypass.common.Config;
-import jkeypass.common.Resources;
+import jkeypass.sync.Sync;
+import jkeypass.sync.SyncException;
+import jkeypass.sync.Synchronizer;
+import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -37,9 +41,17 @@ public class MainFrame extends JFrame {
 
 	private JTable grid;
 
+	private StatusBar statusBar;
+
 	private Map<Action, AbstractAction> actions = new HashMap<>();
 
+	private Settings settings;
+	private Synchronizer synchronizer;
+
 	public MainFrame() {
+		this.settings = new Settings();
+		this.synchronizer = Sync.getSynchronizer(settings.getSyncMethod());
+
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		this.addWindowListener(new WindowAdapter() {
@@ -64,6 +76,9 @@ public class MainFrame extends JFrame {
 
 		JToolBar toolBar = this.createToolBar();
 		this.add((new JPanel(new FlowLayout(FlowLayout.LEFT))).add(toolBar), BorderLayout.NORTH);
+
+		this.statusBar = new StatusBar(this);
+		this.add(this.statusBar, BorderLayout.SOUTH);
 	}
 
 	public void loadDatabase(File databaseFile) {
@@ -81,11 +96,12 @@ public class MainFrame extends JFrame {
 		try {
 			this.database.open();
 		} catch (Exception e) {
-			e.printStackTrace();
 			this.showError("Не удалось открыть файл");
 		}
 
-		this.grid.setModel(new AccountsTableModel(this.database));
+		if (this.database.isOpen()) {
+			this.grid.setModel(new AccountsTableModel(this.database));
+		}
 	}
 
 	@Override
@@ -309,29 +325,76 @@ public class MainFrame extends JFrame {
 	}
 
 	private void openDatabase(File file) {
+		if (this.synchronizer != null) {
+			File syncFile = null;
+
+			this.statusBar.setText("Загрузка из хранилища...");
+
+			try {
+				syncFile = this.synchronizer.load(file);
+			} catch (SyncException e) {
+				showError(e.getMessage());
+			}
+
+			if (syncFile != null) {
+				try {
+					if (!FileUtils.contentEquals(file, syncFile)) {
+						int question = JOptionPane.showConfirmDialog(this, "Файл из хранилища и локальный файл не совпадают." +
+								"Использовать файл из хранилища?", "Warning", JOptionPane.YES_NO_OPTION);
+
+						if (question == JOptionPane.YES_OPTION) {
+							syncFile.renameTo(file);
+						}
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		this.statusBar.setText("Чтение файла...");
+
 		this.loadDatabase(file);
 
 		this.setTitle(this.getTitle());
 
 		this.refreshEnabledActions();
+
+		this.statusBar.clear();
 	}
 
-	private void saveDatabase() {
-		if (this.database == null) {
-			showError("Файл базы паролей не открыт");
-		}
+	private void save() {
+		this.statusBar.setText("Сохранение файла...");
+		if (this.database != null) {
+			this.statusBar.setText("Сохранение файла...");
 
-		try {
-			this.database.save();
-		} catch (IOException e1) {
-			showError("Не удалось записать данные в файл");
+			try {
+				this.database.save();
+			} catch (IOException e1) {
+				showError("Не удалось записать данные в файл");
+			} catch (SyncException e) {
+				// todo: показать в status bar
+				showError(e.getMessage());
+			}
+
+			if (this.synchronizer != null) {
+				try {
+					this.synchronizer.save(this.database.getFile());
+				} catch (SyncException e) {
+					showError(e.getMessage());
+				}
+			}
+
+			this.statusBar.clear();
 		}
 	}
 
 	private void close() {
-		if (database != null) {
+		this.save();
+
+		if (this.database != null) {
 			try {
-				database.close();
+				this.database.close();
 			} catch (IOException e) {
 				showError("Не удалось закрыть файл");
 			}
@@ -343,10 +406,8 @@ public class MainFrame extends JFrame {
 	}
 
 	private void applySettings() {
-		Settings settings = new Settings();
-
 		try {
-			UIManager.setLookAndFeel(settings.getTheme());
+			UIManager.setLookAndFeel(this.settings.getTheme());
 			SwingUtilities.updateComponentTreeUI(this);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -355,12 +416,10 @@ public class MainFrame extends JFrame {
 
 	private void showError(String message) {
 		JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
-		System.exit(0);
 	}
 
 	private void showWarning(String message) {
 		JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
-		System.exit(0);
 	}
 
 	private class CreateFileAction extends AbstractAction {
@@ -428,7 +487,7 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			saveDatabase();
+			save();
 		}
 	}
 
@@ -448,7 +507,7 @@ public class MainFrame extends JFrame {
 			if (accountFrame.showDialog() == AccountDialog.SAVE_OPTION) {
 				database.add(accountFrame.getAccount());
 
-				saveDatabase();
+				save();
 
 				refreshGrid();
 				refreshEnabledActions();
@@ -480,7 +539,7 @@ public class MainFrame extends JFrame {
 			if (accountFrame.showDialog() == AccountDialog.SAVE_OPTION) {
 				database.update(index, accountFrame.getAccount());
 
-				saveDatabase();
+				save();
 
 				refreshGrid();
 				refreshEnabledActions();
@@ -521,7 +580,7 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			SettingsDialog settingsDialog = new SettingsDialog(MainFrame.this, "Настройки");
+			SettingsDialog settingsDialog = new SettingsDialog(MainFrame.this, "Настройки", settings);
 			settingsDialog.setLocationRelativeTo(MainFrame.this);
 
 			if (settingsDialog.showDialog() == SettingsDialog.SAVE_OPTION) {

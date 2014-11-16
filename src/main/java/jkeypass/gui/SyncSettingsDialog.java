@@ -1,8 +1,8 @@
 package jkeypass.gui;
 
 import jkeypass.common.Settings;
-import jkeypass.sync.Sync;
 import jkeypass.common.SettingsPanel;
+import jkeypass.sync.Sync;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,12 +18,12 @@ public class SyncSettingsDialog extends JDialog {
 	private Settings settings;
 	private SettingsPanel panel;
 
-	public SyncSettingsDialog(Dialog owner, Sync.Method method) {
+	public SyncSettingsDialog(Dialog owner, String methodName) {
 		super(owner, "Настройки синхронизации", true);
 
-		this.settings = Sync.getSettings(method);
+		this.settings = Sync.getSettings(methodName);
 
-		this.panel = Sync.getSettingsPanel(method, settings);
+		this.panel = Sync.getSettingsPanel(methodName, settings);
 
 		this.add((JComponent) this.panel);
 

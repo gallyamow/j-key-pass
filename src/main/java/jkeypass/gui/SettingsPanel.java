@@ -1,7 +1,7 @@
 package jkeypass.gui;
 
-import jkeypass.sync.Sync.Method;
 import jkeypass.models.Settings;
+import jkeypass.sync.Sync.Method;
 
 import javax.swing.*;
 import java.awt.*;
@@ -96,7 +96,7 @@ public class SettingsPanel extends GridBagPanel implements jkeypass.common.Setti
 
 				Dialog parent = (Dialog) SwingUtilities.windowForComponent(syncSettingsButton);
 
-				SyncSettingsDialog dialog = new SyncSettingsDialog(parent, method);
+				SyncSettingsDialog dialog = new SyncSettingsDialog(parent, method.getName());
 				dialog.setLocationRelativeTo(parent);
 				dialog.showDialog();
 			}

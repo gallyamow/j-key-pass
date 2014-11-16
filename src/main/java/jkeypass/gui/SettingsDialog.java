@@ -17,10 +17,10 @@ public class SettingsDialog extends JDialog {
 
 	private SettingsPanel panel;
 
-	public SettingsDialog(Frame owner, String title) {
+	public SettingsDialog(Frame owner, String title, Settings settings) {
 		super(owner, title, true);
 
-		this.settings = new Settings();
+		this.settings = settings;
 
 		this.panel = new SettingsPanel(this.settings);
 		this.add(this.panel);
