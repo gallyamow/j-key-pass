@@ -18,6 +18,8 @@ public class SettingsPanel extends JPanel implements jkeypass.common.SettingsPan
 	public SettingsPanel(Settings settings) {
 		super();
 
+		this.setLayout(new GridBagLayout());
+		
 		this.settings = settings;
 
 		this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

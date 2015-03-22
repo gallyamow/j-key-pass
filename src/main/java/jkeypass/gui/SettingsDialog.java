@@ -27,8 +27,9 @@ public class SettingsDialog extends JDialog {
 
 		this.add(this.createButtons(), BorderLayout.SOUTH);
 
-		this.pack();
-		this.setResizable(false);
+		setResizable(false);
+		setLocationByPlatform(true);
+		pack();
 	}
 
 	public int showDialog() {

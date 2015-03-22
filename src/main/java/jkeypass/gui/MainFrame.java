@@ -48,6 +48,8 @@ public class MainFrame extends JFrame {
 	private Settings settings;
 	private Synchronizer synchronizer;
 
+	char[] password;
+
 	public MainFrame() {
 		this.settings = new Settings();
 		this.synchronizer = Sync.getSynchronizer(settings.getSyncMethod());
@@ -422,6 +424,25 @@ public class MainFrame extends JFrame {
 		JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
 	}
 
+	private boolean requestPassword() {
+		PasswordDialog dialog = new PasswordDialog(MainFrame.this, "Введите главный пароль");
+		if (dialog.showDialog() != PasswordDialog.OK_OPTION) {
+			return false;
+		}
+
+		char[] password = dialog.getPassword();
+
+		if (password.length == 0) {
+			showError("Введен пустой пароль");
+
+			return false;
+		}
+
+		this.password = password;
+
+		return true;
+	}
+
 	private class CreateFileAction extends AbstractAction {
 		private CreateFileAction(String name, Icon icon) {
 			super(name, icon);
@@ -453,8 +474,10 @@ public class MainFrame extends JFrame {
 				file = new File(selectedFile + "." + Config.baseExtension);
 			}
 
-			if (file.createNewFile()) {
-				openDatabase(file);
+			if (requestPassword()) {
+				if (file.createNewFile()) {
+					openDatabase(file);
+				}
 			}
 		}
 	}
@@ -475,7 +498,9 @@ public class MainFrame extends JFrame {
 			int result = chooser.showOpenDialog(MainFrame.this);
 
 			if (result == JFileChooser.APPROVE_OPTION) {
-				openDatabase(chooser.getSelectedFile());
+				if (requestPassword()) {
+					openDatabase(chooser.getSelectedFile());
+				}
 			}
 		}
 	}
@@ -502,10 +527,10 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			AccountDialog accountFrame = new AccountDialog(new Account(), MainFrame.this, "Новая запись");
+			AccountDialog dialog = new AccountDialog(new Account(), MainFrame.this, "Новая запись");
 
-			if (accountFrame.showDialog() == AccountDialog.SAVE_OPTION) {
-				database.add(accountFrame.getAccount());
+			if (dialog.showDialog() == AccountDialog.SAVE_OPTION) {
+				database.add(dialog.getAccount());
 
 				save();
 
@@ -534,10 +559,10 @@ public class MainFrame extends JFrame {
 
 			int index = ((AccountsTableModel) grid.getModel()).getDatabaseIndexByRowIndex(selectedRow);
 
-			AccountDialog accountFrame = new AccountDialog(database.get(index), MainFrame.this, "Редактирование записи");
+			AccountDialog dialog = new AccountDialog(database.get(index), MainFrame.this, "Редактирование записи");
 
-			if (accountFrame.showDialog() == AccountDialog.SAVE_OPTION) {
-				database.update(index, accountFrame.getAccount());
+			if (dialog.showDialog() == AccountDialog.SAVE_OPTION) {
+				database.update(index, dialog.getAccount());
 
 				save();
 
@@ -580,10 +605,10 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			SettingsDialog settingsDialog = new SettingsDialog(MainFrame.this, "Настройки", settings);
-			settingsDialog.setLocationRelativeTo(MainFrame.this);
+			SettingsDialog dialog = new SettingsDialog(MainFrame.this, "Настройки", settings);
+			dialog.setLocationRelativeTo(MainFrame.this);
 
-			if (settingsDialog.showDialog() == SettingsDialog.SAVE_OPTION) {
+			if (dialog.showDialog() == SettingsDialog.SAVE_OPTION) {
 				applySettings();
 			}
 		}
