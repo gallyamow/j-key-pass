@@ -51,12 +51,12 @@ public class MainFrame extends JFrame {
 	char[] password;
 
 	public MainFrame() {
-		this.settings = new Settings();
-		this.synchronizer = Sync.getSynchronizer(settings.getSyncMethod());
+		settings = new Settings();
+		synchronizer = Sync.getSynchronizer(settings.getSyncMethod());
 
-		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		this.addWindowListener(new WindowAdapter() {
+		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				super.windowClosing(e);
@@ -64,29 +64,29 @@ public class MainFrame extends JFrame {
 			}
 		});
 
-		this.setSize(640, 480);
+		setSize(640, 480);
 
-		this.applySettings();
+		applySettings();
 
-		this.grid = this.createGrid();
-		this.add(new JScrollPane(this.grid));
+		grid = createGrid();
+		add(new JScrollPane(grid));
 
-		this.initActions();
+		initActions();
 
-		JMenuBar menuBar = this.createMenu();
+		JMenuBar menuBar = createMenu();
 		setJMenuBar(menuBar);
 
-		JToolBar toolBar = this.createToolBar();
-		this.add((new JPanel(new FlowLayout(FlowLayout.LEFT))).add(toolBar), BorderLayout.NORTH);
+		JToolBar toolBar = createToolBar();
+		add((new JPanel(new FlowLayout(FlowLayout.LEFT))).add(toolBar), BorderLayout.NORTH);
 
-		this.statusBar = new StatusBar(this);
-		this.add(this.statusBar, BorderLayout.SOUTH);
+		statusBar = new StatusBar(this);
+		add(statusBar, BorderLayout.SOUTH);
 	}
 
 	public void loadDatabase(File databaseFile) {
-		this.database = new AccountsDatabase(databaseFile);
+		database = new AccountsDatabase(databaseFile);
 
-		if (this.database.isLocked()) {
+		if (database.isLocked()) {
 			int dialog = JOptionPane.showConfirmDialog(this, "Файл либо уже открыт, либо программа была некорректно завершена. " +
 					"Все равно открыть?", "Warning", JOptionPane.YES_NO_OPTION);
 
@@ -96,13 +96,13 @@ public class MainFrame extends JFrame {
 		}
 
 		try {
-			this.database.open();
+			database.open();
 		} catch (Exception e) {
-			this.showError("Не удалось открыть файл");
+			showError("Не удалось открыть файл");
 		}
 
-		if (this.database.isOpen()) {
-			this.grid.setModel(new AccountsTableModel(this.database));
+		if (database.isOpen()) {
+			grid.setModel(new AccountsTableModel(database));
 		}
 	}
 
@@ -110,8 +110,8 @@ public class MainFrame extends JFrame {
 	public String getTitle() {
 		String title = "j-key-pass";
 
-		if (this.database != null) {
-			title += " - " + this.database.getFile().getPath();
+		if (database != null) {
+			title += " - " + database.getFile().getPath();
 		}
 
 		return title;
@@ -127,7 +127,7 @@ public class MainFrame extends JFrame {
 			public void mousePressed(MouseEvent e) {
 				super.mousePressed(e);
 
-				int rowIndex = this.getRowIndex(e);
+				int rowIndex = getRowIndex(e);
 
 				if (rowIndex == -1) {
 					return;
@@ -143,12 +143,12 @@ public class MainFrame extends JFrame {
 				super.mouseClicked(e);
 
 				if (e.getClickCount() == 2) {
-					int rowIndex = this.getRowIndex(e);
+					int rowIndex = getRowIndex(e);
 					if (rowIndex == -1) {
 						return;
 					}
 
-					int columnIndex = this.getColumnIndex(e);
+					int columnIndex = getColumnIndex(e);
 					if (columnIndex == -1) {
 						return;
 					}
@@ -220,39 +220,39 @@ public class MainFrame extends JFrame {
 
 		JMenuItem item;
 
-		item = new JMenuItem(this.actions.get(Action.CREATE_FILE_ACTION));
+		item = new JMenuItem(actions.get(Action.CREATE_FILE_ACTION));
 		item.setAccelerator(KeyStroke.getKeyStroke("ctrl N"));
 		fileMenu.add(item);
 
-		item = new JMenuItem(this.actions.get(Action.OPEN_FILE_ACTION));
+		item = new JMenuItem(actions.get(Action.OPEN_FILE_ACTION));
 		item.setAccelerator(KeyStroke.getKeyStroke("ctrl O"));
 		fileMenu.add(item);
 
-		item = new JMenuItem(this.actions.get(Action.SAVE_FILE_ACTION));
+		item = new JMenuItem(actions.get(Action.SAVE_FILE_ACTION));
 		item.setAccelerator(KeyStroke.getKeyStroke("ctrl S"));
 		fileMenu.add(item);
 
 		fileMenu.addSeparator();
 
-		fileMenu.add(this.actions.get(Action.SETTINGS_ACTION));
+		fileMenu.add(actions.get(Action.SETTINGS_ACTION));
 
 		fileMenu.addSeparator();
 
-		item = new JMenuItem(this.actions.get(Action.EXIT_ACTION));
+		item = new JMenuItem(actions.get(Action.EXIT_ACTION));
 		item.setAccelerator(KeyStroke.getKeyStroke("ctrl Q"));
 		fileMenu.add(item);
 
 		JMenu accountsMenu = new JMenu("Записи");
 
-		item = new JMenuItem(this.actions.get(Action.CREATE_ACCOUNT_ACTION));
+		item = new JMenuItem(actions.get(Action.CREATE_ACCOUNT_ACTION));
 		item.setAccelerator(KeyStroke.getKeyStroke("alt INSERT"));
 		accountsMenu.add(item);
 
-		item = new JMenuItem(this.actions.get(Action.EDIT_ACCOUNT_ACTION));
+		item = new JMenuItem(actions.get(Action.EDIT_ACCOUNT_ACTION));
 		item.setAccelerator(KeyStroke.getKeyStroke("ctrl E"));
 		accountsMenu.add(item);
 
-		item = new JMenuItem(this.actions.get(Action.REMOVE_ACCOUNT_ACTION));
+		item = new JMenuItem(actions.get(Action.REMOVE_ACCOUNT_ACTION));
 		item.setAccelerator(KeyStroke.getKeyStroke("ctrl D"));
 		accountsMenu.add(item);
 
@@ -269,15 +269,15 @@ public class MainFrame extends JFrame {
 		JToolBar bar = new JToolBar();
 		bar.setFloatable(false);
 
-		bar.add(this.actions.get(Action.CREATE_FILE_ACTION));
-		bar.add(this.actions.get(Action.OPEN_FILE_ACTION));
-		bar.add(this.actions.get(Action.SAVE_FILE_ACTION));
+		bar.add(actions.get(Action.CREATE_FILE_ACTION));
+		bar.add(actions.get(Action.OPEN_FILE_ACTION));
+		bar.add(actions.get(Action.SAVE_FILE_ACTION));
 
 		bar.addSeparator();
 
-		bar.add(this.actions.get(Action.CREATE_ACCOUNT_ACTION));
-		bar.add(this.actions.get(Action.EDIT_ACCOUNT_ACTION));
-		bar.add(this.actions.get(Action.REMOVE_ACCOUNT_ACTION));
+		bar.add(actions.get(Action.CREATE_ACCOUNT_ACTION));
+		bar.add(actions.get(Action.EDIT_ACCOUNT_ACTION));
+		bar.add(actions.get(Action.REMOVE_ACCOUNT_ACTION));
 
 		return bar;
 	}
@@ -285,55 +285,55 @@ public class MainFrame extends JFrame {
 	private void initActions() {
 		Resources resources = new Resources();
 
-		this.actions.put(Action.CREATE_FILE_ACTION, new CreateFileAction("Создать базу паролей",
+		actions.put(Action.CREATE_FILE_ACTION, new CreateFileAction("Создать базу паролей",
 				resources.getIcon("create-file.png")));
-		this.actions.put(Action.OPEN_FILE_ACTION, new OpenFileAction("Открыть базу паролей",
+		actions.put(Action.OPEN_FILE_ACTION, new OpenFileAction("Открыть базу паролей",
 				resources.getIcon("open-file.png")));
-		this.actions.put(Action.SAVE_FILE_ACTION, new SaveFileAction("Сохранить базу паролей",
+		actions.put(Action.SAVE_FILE_ACTION, new SaveFileAction("Сохранить базу паролей",
 				resources.getIcon("save-file.png")));
 
-		this.actions.put(Action.CREATE_ACCOUNT_ACTION, new CreateAccountAction("Добавить новую запись",
+		actions.put(Action.CREATE_ACCOUNT_ACTION, new CreateAccountAction("Добавить новую запись",
 				resources.getIcon("create-account.png")));
-		this.actions.put(Action.EDIT_ACCOUNT_ACTION, new EditAccountAction("Редактировать выбранную запись",
+		actions.put(Action.EDIT_ACCOUNT_ACTION, new EditAccountAction("Редактировать выбранную запись",
 				resources.getIcon("edit-account.png")));
-		this.actions.put(Action.REMOVE_ACCOUNT_ACTION, new RemoveAccountAction("Удалить выбранную запись",
+		actions.put(Action.REMOVE_ACCOUNT_ACTION, new RemoveAccountAction("Удалить выбранную запись",
 				resources.getIcon("remove-account.png")));
 
-		this.actions.put(Action.SETTINGS_ACTION, new SettingsAction("Настройки", resources.getIcon("settings.png")));
-		this.actions.put(Action.EXIT_ACTION, new ExitAction("Закрыть программу", resources.getIcon("exit.png")));
+		actions.put(Action.SETTINGS_ACTION, new SettingsAction("Настройки", resources.getIcon("settings.png")));
+		actions.put(Action.EXIT_ACTION, new ExitAction("Закрыть программу", resources.getIcon("exit.png")));
 
-		this.refreshEnabledActions();
+		refreshEnabledActions();
 	}
 
 	private void refreshEnabledActions() {
-		boolean fileOpened = this.database != null && this.database.getFile() != null;
-		boolean rowSelected = this.grid.getSelectedRow() != -1;
+		boolean fileOpened = database != null && database.getFile() != null;
+		boolean rowSelected = grid.getSelectedRow() != -1;
 
 		if (fileOpened) {
-			this.actions.get(Action.SAVE_FILE_ACTION).setEnabled(true);
-			this.actions.get(Action.CREATE_ACCOUNT_ACTION).setEnabled(true);
+			actions.get(Action.SAVE_FILE_ACTION).setEnabled(true);
+			actions.get(Action.CREATE_ACCOUNT_ACTION).setEnabled(true);
 		} else {
-			this.actions.get(Action.SAVE_FILE_ACTION).setEnabled(false);
-			this.actions.get(Action.CREATE_ACCOUNT_ACTION).setEnabled(false);
+			actions.get(Action.SAVE_FILE_ACTION).setEnabled(false);
+			actions.get(Action.CREATE_ACCOUNT_ACTION).setEnabled(false);
 		}
 
 		if (fileOpened && rowSelected) {
-			this.actions.get(Action.EDIT_ACCOUNT_ACTION).setEnabled(true);
-			this.actions.get(Action.REMOVE_ACCOUNT_ACTION).setEnabled(true);
+			actions.get(Action.EDIT_ACCOUNT_ACTION).setEnabled(true);
+			actions.get(Action.REMOVE_ACCOUNT_ACTION).setEnabled(true);
 		} else {
-			this.actions.get(Action.EDIT_ACCOUNT_ACTION).setEnabled(false);
-			this.actions.get(Action.REMOVE_ACCOUNT_ACTION).setEnabled(false);
+			actions.get(Action.EDIT_ACCOUNT_ACTION).setEnabled(false);
+			actions.get(Action.REMOVE_ACCOUNT_ACTION).setEnabled(false);
 		}
 	}
 
 	private void openDatabase(File file) {
-		if (this.synchronizer != null) {
+		if (synchronizer != null) {
 			File syncFile = null;
 
-			this.statusBar.setText("Загрузка из хранилища...");
+			statusBar.setText("Загрузка из хранилища...");
 
 			try {
-				syncFile = this.synchronizer.load(file);
+				syncFile = synchronizer.load(file);
 			} catch (SyncException e) {
 				showError(e.getMessage());
 			}
@@ -354,24 +354,24 @@ public class MainFrame extends JFrame {
 			}
 		}
 
-		this.statusBar.setText("Чтение файла...");
+		statusBar.setText("Чтение файла...");
 
-		this.loadDatabase(file);
+		loadDatabase(file);
 
-		this.setTitle(this.getTitle());
+		setTitle(getTitle());
 
-		this.refreshEnabledActions();
+		refreshEnabledActions();
 
-		this.statusBar.clear();
+		statusBar.clear();
 	}
 
 	private void save() {
-		this.statusBar.setText("Сохранение файла...");
-		if (this.database != null) {
-			this.statusBar.setText("Сохранение файла...");
+		statusBar.setText("Сохранение файла...");
+		if (database != null) {
+			statusBar.setText("Сохранение файла...");
 
 			try {
-				this.database.save();
+				database.save();
 			} catch (IOException e1) {
 				showError("Не удалось записать данные в файл");
 			} catch (SyncException e) {
@@ -379,24 +379,24 @@ public class MainFrame extends JFrame {
 				showError(e.getMessage());
 			}
 
-			if (this.synchronizer != null) {
+			if (synchronizer != null) {
 				try {
-					this.synchronizer.save(this.database.getFile());
+					synchronizer.save(database.getFile());
 				} catch (SyncException e) {
 					showError(e.getMessage());
 				}
 			}
 
-			this.statusBar.clear();
+			statusBar.clear();
 		}
 	}
 
 	private void close() {
-		this.save();
+		save();
 
-		if (this.database != null) {
+		if (database != null) {
 			try {
-				this.database.close();
+				database.close();
 			} catch (IOException e) {
 				showError("Не удалось закрыть файл");
 			}
@@ -409,7 +409,7 @@ public class MainFrame extends JFrame {
 
 	private void applySettings() {
 		try {
-			UIManager.setLookAndFeel(this.settings.getTheme());
+			UIManager.setLookAndFeel(settings.getTheme());
 			SwingUtilities.updateComponentTreeUI(this);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -438,7 +438,7 @@ public class MainFrame extends JFrame {
 			return false;
 		}
 
-		this.password = password;
+		password = password;
 
 		return true;
 	}
@@ -460,7 +460,7 @@ public class MainFrame extends JFrame {
 
 			if (result == JFileChooser.APPROVE_OPTION) {
 				try {
-					this.createNewFile(chooser.getSelectedFile());
+					createNewFile(chooser.getSelectedFile());
 				} catch (IOException ex) {
 					showError("Не удалось сохранить файл");
 				}

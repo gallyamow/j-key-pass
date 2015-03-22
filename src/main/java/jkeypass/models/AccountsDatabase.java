@@ -14,31 +14,31 @@ public class AccountsDatabase {
 
 	public AccountsDatabase(File file) {
 		this.file = file;
-		this.lockFile = new File(this.file.getParent(), this.file.getName() + ".lock");
+		lockFile = new File(file.getParent(), file.getName() + ".lock");
 	}
 
 	public File getFile() {
-		return this.file;
+		return file;
 	}
 
 	public Account get(int index) {
-		return this.list.get(index);
+		return list.get(index);
 	}
 
 	public int count() {
-		return this.list.size();
+		return list.size();
 	}
 
 	public void add(Account account) {
-		this.list.add(account);
+		list.add(account);
 	}
 
 	public void update(int index, Account account) {
-		this.list.set(index, account);
+		list.set(index, account);
 	}
 
 	public void remove(int index) {
-		this.list.remove(index);
+		list.remove(index);
 	}
 
 	public boolean isOpen() {
@@ -47,12 +47,12 @@ public class AccountsDatabase {
 
 	public void open() throws IOException, ClassNotFoundException {
 		if (file.length() > 0) {
-			try (ObjectInputStream objectStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(this.file)))) {
+			try (ObjectInputStream objectStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
 				Account account;
 
 				try {
 					while ((account = (Account) objectStream.readObject()) != null) {
-						this.add(account);
+						add(account);
 					}
 				} catch (IOException e) {
 					// e.printStackTrace(); todo: корректно обработать
@@ -62,15 +62,15 @@ public class AccountsDatabase {
 			}
 		}
 
-		this.lock();
-		this.open = true;
+		lock();
+		open = true;
 	}
 
 	public void save() throws IOException, SyncException {
-		if (this.open) {
+		if (open) {
 			// очистка произойдет автоматически, так как FileOutputStream сконструирован с append = false
-			try (ObjectOutputStream objectStream = new ObjectOutputStream(new FileOutputStream(this.file))) {
-				for (Account account : this.list) {
+			try (ObjectOutputStream objectStream = new ObjectOutputStream(new FileOutputStream(file))) {
+				for (Account account : list) {
 					objectStream.writeObject(account);
 				}
 				objectStream.close();
@@ -79,18 +79,18 @@ public class AccountsDatabase {
 	}
 
 	public void close() throws IOException {
-		this.unlock();
+		unlock();
 	}
 
 	public boolean isLocked() {
-		return this.lockFile.exists();
+		return lockFile.exists();
 	}
 
 	private void lock() throws IOException {
-		this.lockFile.createNewFile();
+		lockFile.createNewFile();
 	}
 
 	private void unlock() throws IOException {
-		this.lockFile.delete();
+		lockFile.delete();
 	}
 }

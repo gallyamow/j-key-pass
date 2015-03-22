@@ -32,7 +32,7 @@ public class AccountsTableModel extends AbstractTableModel {
 
 	@Override
 	public int getRowCount() {
-		return this.database.count();
+		return database.count();
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class AccountsTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		Account account = this.database.get(rowIndex);
+		Account account = database.get(rowIndex);
 
 		String result = null;
 

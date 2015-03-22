@@ -10,20 +10,19 @@ public class StatusBar extends JPanel {
 	public StatusBar(Frame frame) {
 		this.frame = frame;
 
-		//this.setBorder(new BevelBorder(BevelBorder.RAISED));
-		this.setPreferredSize(new Dimension(frame.getWidth(), 20));
-		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+		setPreferredSize(new Dimension(frame.getWidth(), 20));
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-		this.label = new JLabel();
-		this.label.setHorizontalAlignment(SwingConstants.LEFT);
-		this.add(label);
+		label = new JLabel();
+		label.setHorizontalAlignment(SwingConstants.LEFT);
+		add(label);
 	}
 
 	public void setText(String text) {
-		this.label.setText(text);
+		label.setText(text);
 	}
 
 	public void clear() {
-		this.setText("");
+		setText("");
 	}
 }

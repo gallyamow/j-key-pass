@@ -32,9 +32,9 @@ public class DropboxSettings implements jkeypass.common.Settings {
 	private Preferences preferences;
 
 	public DropboxSettings() {
-		this.preferences = Preferences.userRoot().node("j-key-pass").node("dropbox");
+		preferences = Preferences.userRoot().node("j-key-pass").node("dropbox");
 
-		this.initParams();
+		initParams();
 	}
 
 	public String getKey() {
@@ -62,14 +62,14 @@ public class DropboxSettings implements jkeypass.common.Settings {
 	}
 
 	public void save() {
-		this.preferences.put(Options.KEY.getKey(), this.getKey());
-		this.preferences.put(Options.SECRET.getKey(), this.getSecret());
-		this.preferences.put(Options.TOKEN.getKey(), this.getToken());
+		preferences.put(Options.KEY.getKey(), getKey());
+		preferences.put(Options.SECRET.getKey(), getSecret());
+		preferences.put(Options.TOKEN.getKey(), getToken());
 	}
 
 	private void initParams() {
-		this.setKey(this.preferences.get(Options.KEY.getKey(), ""));
-		this.setSecret(this.preferences.get(Options.SECRET.getKey(), ""));
-		this.setToken(this.preferences.get(Options.TOKEN.getKey(), ""));
+		setKey(preferences.get(Options.KEY.getKey(), ""));
+		setSecret(preferences.get(Options.SECRET.getKey(), ""));
+		setToken(preferences.get(Options.TOKEN.getKey(), ""));
 	}
 }

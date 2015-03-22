@@ -39,7 +39,7 @@ public class Sync {
 
 		@Override
 		public String toString() {
-			return this.getLabel();
+			return getLabel();
 		}
 	}
 

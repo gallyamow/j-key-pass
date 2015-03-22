@@ -18,23 +18,23 @@ public class AccountDialog extends JDialog {
 	public AccountDialog(Account account, Frame owner, String title) {
 		super(owner, title, true);
 
-		this.panel = new AccountEditorPanel(account);
-		this.add(this.panel);
+		panel = new AccountEditorPanel(account);
+		add(panel);
 
-		this.add(this.createButtons(), BorderLayout.SOUTH);
+		add(createButtons(), BorderLayout.SOUTH);
 
 		setLocationByPlatform(true);
 		pack();
 	}
 
 	public int showDialog() {
-		this.setVisible(true);
+		setVisible(true);
 
-		return this.result;
+		return result;
 	}
 
 	public Account getAccount() {
-		return this.panel.getUpdatedAccount();
+		return panel.getUpdatedAccount();
 	}
 
 	private JPanel createButtons() {
@@ -62,7 +62,7 @@ public class AccountDialog extends JDialog {
 
 		buttonPanel.add(closeButton);
 
-		this.getRootPane().setDefaultButton(saveButton);
+		getRootPane().setDefaultButton(saveButton);
 
 		return buttonPanel;
 	}

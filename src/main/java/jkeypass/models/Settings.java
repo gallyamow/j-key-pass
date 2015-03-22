@@ -33,14 +33,14 @@ public class Settings implements jkeypass.common.Settings {
 	private Preferences preferences;
 
 	public Settings() {
-		this.preferences = Preferences.userRoot().node("j-key-pass");
+		preferences = Preferences.userRoot().node("j-key-pass");
 
-		this.initParams();
+		initParams();
 	}
 
 	public void save() {
-		this.preferences.put(Options.THEME.getKey(), this.getTheme());
-		this.preferences.put(Options.SYNC_METHOD.getKey(), this.getSyncMethod());
+		preferences.put(Options.THEME.getKey(), getTheme());
+		preferences.put(Options.SYNC_METHOD.getKey(), getSyncMethod());
 	}
 
 	public void setTheme(String theme) {
@@ -48,7 +48,7 @@ public class Settings implements jkeypass.common.Settings {
 	}
 
 	public String getTheme() {
-		return this.theme;
+		return theme;
 	}
 
 	public void setSyncMethod(String syncMethod) {
@@ -60,7 +60,7 @@ public class Settings implements jkeypass.common.Settings {
 	}
 
 	private void initParams() {
-		this.setTheme(this.preferences.get(Options.THEME.getKey(), UIManager.getSystemLookAndFeelClassName()));
-		this.setSyncMethod(this.preferences.get(Options.SYNC_METHOD.getKey(), Sync.Method.NOSYNC.getName()));
+		setTheme(preferences.get(Options.THEME.getKey(), UIManager.getSystemLookAndFeelClassName()));
+		setSyncMethod(preferences.get(Options.SYNC_METHOD.getKey(), Sync.Method.NOSYNC.getName()));
 	}
 }

@@ -32,7 +32,7 @@ public class AccountEditorPanel extends JPanel {
 		}
 
 		public String getLabel() {
-			return this.label;
+			return label;
 		}
 	}
 
@@ -51,11 +51,11 @@ public class AccountEditorPanel extends JPanel {
 		}
 
 		public String getName() {
-			return this.name;
+			return name;
 		}
 
 		public String getSymbols() {
-			return this.symbols;
+			return symbols;
 		}
 	}
 
@@ -65,20 +65,20 @@ public class AccountEditorPanel extends JPanel {
 	public AccountEditorPanel(Account account) {
 		super();
 
-		this.setLayout(new GridBagLayout());
+		setLayout(new GridBagLayout());
 
-		this.account = account;
+		account = account;
 
-		this.setBorder(BorderFactory.createCompoundBorder(
+		setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createTitledBorder("Аккаунт"),
 				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
-		this.createInputs();
+		createInputs();
 	}
 
 	public Account getUpdatedAccount() {
 		for (Field field : Field.values()) {
-			JComponent input = this.fieldMap.get(field);
+			JComponent input = fieldMap.get(field);
 
 			String value = "";
 
@@ -86,22 +86,22 @@ public class AccountEditorPanel extends JPanel {
 				value = ((JTextComponent) input).getText();
 			}
 
-			this.setAccountProperty(field.setter, value);
+			setAccountProperty(field.setter, value);
 		}
 
-		return this.account;
+		return account;
 	}
 
 	private void createInputs() {
 		int i = 0;
 
 		for (Field field : new Field[]{Field.NAME, Field.URL, Field.LOGIN}) {
-			this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
+			add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
 
-			JTextField inputField = new JTextField((String) this.getAccountProperty(field.getter), 10);
-			this.add(inputField, GridBagLayoutHelper.createGbc(1, i));
+			JTextField inputField = new JTextField((String) getAccountProperty(field.getter), 10);
+			add(inputField, GridBagLayoutHelper.createGbc(1, i));
 
-			this.fieldMap.put(field, inputField);
+			fieldMap.put(field, inputField);
 
 			i++;
 		}
@@ -111,11 +111,11 @@ public class AccountEditorPanel extends JPanel {
 		i++;
 		field = Field.PASSWORD;
 
-		this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
+		add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
 
 		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
-		JPasswordField passwordField = new JPasswordField((String) this.getAccountProperty(field.getter), 30);
+		JPasswordField passwordField = new JPasswordField((String) getAccountProperty(field.getter), 30);
 		passwordPanel.add(passwordField);
 
 		JButton showPasswordButton = new JButton("Показать пароль", (new Resources()).getIcon("show-password.png"));
@@ -133,25 +133,25 @@ public class AccountEditorPanel extends JPanel {
 		});
 
 		passwordPanel.add(showPasswordButton);
-		this.add(passwordPanel, GridBagLayoutHelper.createGbc(1, i));
+		add(passwordPanel, GridBagLayoutHelper.createGbc(1, i));
 
-		this.fieldMap.put(field, passwordField);
+		fieldMap.put(field, passwordField);
 
 		i++;
 		GridBagConstraints gbc = new GridBagConstraints(0, i, 2, 1, 0.1, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 0, 5, 5), 0, 0);
-		JPanel generator = this.createPasswordGeneratorPanel();
-		this.add(generator, gbc);
+		JPanel generator = createPasswordGeneratorPanel();
+		add(generator, gbc);
 
 		i++;
 		field = Field.DESCRIPTION;
 
-		this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
+		add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
 
-		JTextArea textArea = new JTextArea((String) this.getAccountProperty(field.getter), 6, 20);
+		JTextArea textArea = new JTextArea((String) getAccountProperty(field.getter), 6, 20);
 		textArea.setLineWrap(true);
-		this.add(new JScrollPane(textArea), GridBagLayoutHelper.createGbc(1, i));
+		add(new JScrollPane(textArea), GridBagLayoutHelper.createGbc(1, i));
 
-		this.fieldMap.put(field, textArea);
+		fieldMap.put(field, textArea);
 	}
 
 	private JPanel createPasswordGeneratorPanel() {
@@ -220,7 +220,7 @@ public class AccountEditorPanel extends JPanel {
 		Object result = null;
 
 		try {
-			result = Account.class.getMethod(getter).invoke(this.account);
+			result = Account.class.getMethod(getter).invoke(account);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -230,7 +230,7 @@ public class AccountEditorPanel extends JPanel {
 
 	private void setAccountProperty(String setter, Object value) {
 		try {
-			Account.class.getMethod(setter, value.getClass()).invoke(this.account, value);
+			Account.class.getMethod(setter, value.getClass()).invoke(account, value);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

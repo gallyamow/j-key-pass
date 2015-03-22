@@ -18,14 +18,14 @@ public class DropboxSynchronizer implements Synchronizer {
 	public DropboxSynchronizer(String key, String secret, String token) {
 		DbxRequestConfig config = new DbxRequestConfig("j-key-pass", Locale.getDefault().toString());
 
-		this.client = new DbxClient(config, token);
+		client = new DbxClient(config, token);
 	}
 
 	public void save(File databaseFile) throws SyncException {
 		try {
 			try (FileInputStream inputStream = new FileInputStream(databaseFile)) {
 				try {
-					this.client.uploadFile(this.getFilePathOnDropbox(databaseFile), DbxWriteMode.force(), databaseFile.length(), inputStream);
+					client.uploadFile(getFilePathOnDropbox(databaseFile), DbxWriteMode.force(), databaseFile.length(), inputStream);
 				} catch (Exception e) {
 					throw new SyncException("Не удалось сохранить файл в удаленное хранилище", e);
 				}
@@ -43,7 +43,7 @@ public class DropboxSynchronizer implements Synchronizer {
 		try {
 			try (FileOutputStream outputStream = new FileOutputStream(dropboxFile)) {
 				try {
-					this.client.getFile(this.getFilePathOnDropbox(databaseFile), null, outputStream);
+					client.getFile(getFilePathOnDropbox(databaseFile), null, outputStream);
 				} catch (Exception e) {
 					throw new SyncException("Не удалось загрузить файл из удаленного хранилища", e);
 				}

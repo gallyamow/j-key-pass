@@ -21,28 +21,28 @@ public class SyncSettingsDialog extends JDialog {
 	public SyncSettingsDialog(Dialog owner, String methodName) {
 		super(owner, "Настройки синхронизации", true);
 
-		this.settings = Sync.getSettings(methodName);
+		settings = Sync.getSettings(methodName);
 
-		this.panel = Sync.getSettingsPanel(methodName, settings);
+		panel = Sync.getSettingsPanel(methodName, settings);
 
-		this.add((JComponent) this.panel);
+		add((JComponent) panel);
 
-		this.add(this.createButtons(), BorderLayout.SOUTH);
+		add(createButtons(), BorderLayout.SOUTH);
 
-		this.pack();
-		this.setResizable(false);
+		pack();
+		setResizable(false);
 	}
 
 	public int showDialog() {
-		this.setVisible(true);
+		setVisible(true);
 
-		return this.result;
+		return result;
 	}
 
 	private void save() {
-		this.settings = this.panel.getUpdatedSettings();
+		settings = panel.getUpdatedSettings();
 
-		this.settings.save();
+		settings.save();
 	}
 
 	private JPanel createButtons() {
@@ -71,7 +71,7 @@ public class SyncSettingsDialog extends JDialog {
 
 		buttonPanel.add(closeButton);
 
-		this.getRootPane().setDefaultButton(saveButton);
+		getRootPane().setDefaultButton(saveButton);
 
 		return buttonPanel;
 	}

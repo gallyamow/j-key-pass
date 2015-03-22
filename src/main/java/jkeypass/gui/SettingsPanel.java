@@ -18,35 +18,35 @@ public class SettingsPanel extends JPanel implements jkeypass.common.SettingsPan
 	public SettingsPanel(Settings settings) {
 		super();
 
-		this.setLayout(new GridBagLayout());
+		setLayout(new GridBagLayout());
 		
 		this.settings = settings;
 
-		this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
 		int i = 0;
 
-		this.createThemeBox(++i);
-		this.createSyncBox(++i);
+		createThemeBox(++i);
+		createSyncBox(++i);
 	}
 
 	@Override
 	public Settings getUpdatedSettings() {
-		String theme = ((UIManager.LookAndFeelInfo) this.themeBox.getSelectedItem()).getClassName();
-		this.settings.setTheme(theme);
+		String theme = ((UIManager.LookAndFeelInfo) themeBox.getSelectedItem()).getClassName();
+		settings.setTheme(theme);
 
-		String methodName = ((Method) this.syncMethodBox.getSelectedItem()).getName();
-		this.settings.setSyncMethod(methodName);
+		String methodName = ((Method) syncMethodBox.getSelectedItem()).getName();
+		settings.setSyncMethod(methodName);
 
-		return this.settings;
+		return settings;
 	}
 
 	private void createThemeBox(int rowIndex) {
-		this.add(new JLabel(Settings.Options.THEME.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, rowIndex));
+		add(new JLabel(Settings.Options.THEME.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, rowIndex));
 
-		this.themeBox = new JComboBox<>();
+		themeBox = new JComboBox<>();
 
-		this.themeBox.setRenderer(new ListCellRenderer<UIManager.LookAndFeelInfo>() {
+		themeBox.setRenderer(new ListCellRenderer<UIManager.LookAndFeelInfo>() {
 			@Override
 			public Component getListCellRendererComponent(JList<? extends UIManager.LookAndFeelInfo> list,
 														  UIManager.LookAndFeelInfo value,
@@ -68,28 +68,28 @@ public class SettingsPanel extends JPanel implements jkeypass.common.SettingsPan
 		for (UIManager.LookAndFeelInfo item : UIManager.getInstalledLookAndFeels()) {
 			themeBox.addItem(item);
 
-			if (item.getClassName().equals(this.settings.getTheme())) {
+			if (item.getClassName().equals(settings.getTheme())) {
 				selected = item;
 			}
 		}
 
-		this.themeBox.setSelectedItem(selected);
+		themeBox.setSelectedItem(selected);
 
-		this.add(this.themeBox, GridBagLayoutHelper.createGbc(1, rowIndex));
+		add(themeBox, GridBagLayoutHelper.createGbc(1, rowIndex));
 	}
 
 	private void createSyncBox(int rowIndex) {
 		Method selected = null;
 
-		this.syncMethodBox = new JComboBox();
+		syncMethodBox = new JComboBox();
 		for (Method item : Method.values()) {
-			this.syncMethodBox.addItem(item);
+			syncMethodBox.addItem(item);
 
-			if (item.getName().equals(this.settings.getSyncMethod())) {
+			if (item.getName().equals(settings.getSyncMethod())) {
 				selected = item;
 			}
 		}
-		this.syncMethodBox.setSelectedItem(selected);
+		syncMethodBox.setSelectedItem(selected);
 
 		final JButton syncSettingsButton = new JButton("Настройка синхронизации");
 		syncSettingsButton.addActionListener(new ActionListener() {
@@ -105,7 +105,7 @@ public class SettingsPanel extends JPanel implements jkeypass.common.SettingsPan
 			}
 		});
 
-		this.syncMethodBox.addActionListener(new ActionListener() {
+		syncMethodBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Method method = (Method) syncMethodBox.getSelectedItem();
@@ -118,15 +118,15 @@ public class SettingsPanel extends JPanel implements jkeypass.common.SettingsPan
 			}
 		});
 
-		if (this.settings.getSyncMethod().equals(Method.NOSYNC.getName())) {
+		if (settings.getSyncMethod().equals(Method.NOSYNC.getName())) {
 			syncSettingsButton.setEnabled(false);
 		}
 
 		JPanel container = new JPanel();
-		container.add(this.syncMethodBox);
+		container.add(syncMethodBox);
 		container.add(syncSettingsButton);
 
-		this.add(new JLabel(Settings.Options.SYNC_METHOD.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, rowIndex));
-		this.add(container, GridBagLayoutHelper.createGbc(1, rowIndex));
+		add(new JLabel(Settings.Options.SYNC_METHOD.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, rowIndex));
+		add(container, GridBagLayoutHelper.createGbc(1, rowIndex));
 	}
 }

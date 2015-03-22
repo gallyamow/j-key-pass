@@ -21,9 +21,13 @@ public class PasswordDialog extends JDialog {
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		panel.setLayout(new GridBagLayout());
-
+		
+		int i = 0;
+		
+		panel.add(new JLabel(title), GridBagLayoutHelper.createGbc(0, ++i));
+		
 		passwordField = new JPasswordField();
-		panel.add(passwordField, GridBagLayoutHelper.createGbc(0, 1));
+		panel.add(passwordField, GridBagLayoutHelper.createGbc(0, ++i));
 
 		add(panel);
 		add(createButtons(), BorderLayout.SOUTH);
@@ -41,7 +45,7 @@ public class PasswordDialog extends JDialog {
 	}
 
 	public char[] getPassword() {
-		return this.passwordField.getPassword();
+		return passwordField.getPassword();
 	}
 
 	private JPanel createButtons() {

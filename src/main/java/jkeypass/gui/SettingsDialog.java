@@ -22,10 +22,10 @@ public class SettingsDialog extends JDialog {
 
 		this.settings = settings;
 
-		this.panel = new SettingsPanel(this.settings);
-		this.add(this.panel);
+		panel = new SettingsPanel(settings);
+		add(panel);
 
-		this.add(this.createButtons(), BorderLayout.SOUTH);
+		add(createButtons(), BorderLayout.SOUTH);
 
 		setResizable(false);
 		setLocationByPlatform(true);
@@ -33,14 +33,14 @@ public class SettingsDialog extends JDialog {
 	}
 
 	public int showDialog() {
-		this.setVisible(true);
+		setVisible(true);
 
-		return this.result;
+		return result;
 	}
 
 	private void save() {
-		this.settings = this.panel.getUpdatedSettings();
-		this.settings.save();
+		settings = panel.getUpdatedSettings();
+		settings.save();
 	}
 
 	private JPanel createButtons() {
@@ -69,7 +69,7 @@ public class SettingsDialog extends JDialog {
 
 		buttonPanel.add(closeButton);
 
-		this.getRootPane().setDefaultButton(saveButton);
+		getRootPane().setDefaultButton(saveButton);
 
 		return buttonPanel;
 	}
