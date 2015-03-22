@@ -1,17 +1,12 @@
-package jkeypass.gui;
+package jkeypass.common;
 
-import javax.swing.*;
 import java.awt.*;
 
-public class GridBagPanel extends JPanel {
+public class GridBagLayoutHelper {
 	private static final Insets WEST_INSETS = new Insets(5, 0, 5, 5);
 	private static final Insets EAST_INSETS = new Insets(5, 5, 5, 0);
 
-	public GridBagPanel() {
-		this.setLayout(new GridBagLayout());
-	}
-
-	protected GridBagConstraints createGbc(int x, int y) {
+	public static GridBagConstraints createGbc(int x, int y) {
 		GridBagConstraints gbc = new GridBagConstraints();
 
 		gbc.gridx = x;

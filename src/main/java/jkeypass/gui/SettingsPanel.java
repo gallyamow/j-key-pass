@@ -1,5 +1,6 @@
 package jkeypass.gui;
 
+import jkeypass.common.GridBagLayoutHelper;
 import jkeypass.models.Settings;
 import jkeypass.sync.Sync.Method;
 
@@ -8,7 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class SettingsPanel extends GridBagPanel implements jkeypass.common.SettingsPanel {
+public class SettingsPanel extends JPanel implements jkeypass.common.SettingsPanel {
 	private Settings settings;
 
 	private JComboBox<UIManager.LookAndFeelInfo> themeBox;
@@ -39,7 +40,7 @@ public class SettingsPanel extends GridBagPanel implements jkeypass.common.Setti
 	}
 
 	private void createThemeBox(int rowIndex) {
-		this.add(new JLabel(Settings.Options.THEME.getLabel() + ":", JLabel.LEFT), this.createGbc(0, rowIndex));
+		this.add(new JLabel(Settings.Options.THEME.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, rowIndex));
 
 		this.themeBox = new JComboBox<>();
 
@@ -72,7 +73,7 @@ public class SettingsPanel extends GridBagPanel implements jkeypass.common.Setti
 
 		this.themeBox.setSelectedItem(selected);
 
-		this.add(this.themeBox, this.createGbc(1, rowIndex));
+		this.add(this.themeBox, GridBagLayoutHelper.createGbc(1, rowIndex));
 	}
 
 	private void createSyncBox(int rowIndex) {
@@ -123,7 +124,7 @@ public class SettingsPanel extends GridBagPanel implements jkeypass.common.Setti
 		container.add(this.syncMethodBox);
 		container.add(syncSettingsButton);
 
-		this.add(new JLabel(Settings.Options.SYNC_METHOD.getLabel() + ":", JLabel.LEFT), this.createGbc(0, rowIndex));
-		this.add(container, this.createGbc(1, rowIndex));
+		this.add(new JLabel(Settings.Options.SYNC_METHOD.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, rowIndex));
+		this.add(container, GridBagLayoutHelper.createGbc(1, rowIndex));
 	}
 }

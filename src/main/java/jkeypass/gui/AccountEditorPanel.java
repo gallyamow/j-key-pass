@@ -1,5 +1,6 @@
 package jkeypass.gui;
 
+import jkeypass.common.GridBagLayoutHelper;
 import jkeypass.common.Resources;
 import jkeypass.models.Account;
 
@@ -12,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class AccountEditorPanel extends GridBagPanel {
+public class AccountEditorPanel extends JPanel {
 	enum Field {
 		NAME("Название", "getName", "setName"),
 		LOGIN("Логин", "getLogin", "setLogin"),
@@ -64,6 +65,8 @@ public class AccountEditorPanel extends GridBagPanel {
 	public AccountEditorPanel(Account account) {
 		super();
 
+		this.setLayout(new GridBagLayout());
+
 		this.account = account;
 
 		this.setBorder(BorderFactory.createCompoundBorder(
@@ -93,10 +96,10 @@ public class AccountEditorPanel extends GridBagPanel {
 		int i = 0;
 
 		for (Field field : new Field[]{Field.NAME, Field.URL, Field.LOGIN}) {
-			this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), this.createGbc(0, i));
+			this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
 
 			JTextField inputField = new JTextField((String) this.getAccountProperty(field.getter), 10);
-			this.add(inputField, this.createGbc(1, i));
+			this.add(inputField, GridBagLayoutHelper.createGbc(1, i));
 
 			this.fieldMap.put(field, inputField);
 
@@ -108,7 +111,7 @@ public class AccountEditorPanel extends GridBagPanel {
 		i++;
 		field = Field.PASSWORD;
 
-		this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), this.createGbc(0, i));
+		this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
 
 		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
@@ -130,7 +133,7 @@ public class AccountEditorPanel extends GridBagPanel {
 		});
 
 		passwordPanel.add(showPasswordButton);
-		this.add(passwordPanel, this.createGbc(1, i));
+		this.add(passwordPanel, GridBagLayoutHelper.createGbc(1, i));
 
 		this.fieldMap.put(field, passwordField);
 
@@ -142,11 +145,11 @@ public class AccountEditorPanel extends GridBagPanel {
 		i++;
 		field = Field.DESCRIPTION;
 
-		this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), this.createGbc(0, i));
+		this.add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
 
 		JTextArea textArea = new JTextArea((String) this.getAccountProperty(field.getter), 6, 20);
 		textArea.setLineWrap(true);
-		this.add(new JScrollPane(textArea), this.createGbc(1, i));
+		this.add(new JScrollPane(textArea), GridBagLayoutHelper.createGbc(1, i));
 
 		this.fieldMap.put(field, textArea);
 	}
