@@ -50,10 +50,6 @@ public class AccountEditorPanel extends JPanel {
 			this.symbols = symbols;
 		}
 
-		public String getName() {
-			return name;
-		}
-
 		public String getSymbols() {
 			return symbols;
 		}
@@ -67,7 +63,7 @@ public class AccountEditorPanel extends JPanel {
 
 		setLayout(new GridBagLayout());
 
-		account = account;
+		this.account = account;
 
 		setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createTitledBorder("Аккаунт"),

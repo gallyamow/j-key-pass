@@ -1,6 +1,7 @@
 package jkeypass.gui;
 
 import jkeypass.common.Config;
+import jkeypass.common.Crypto;
 import jkeypass.common.Resources;
 import jkeypass.models.Account;
 import jkeypass.models.AccountsDatabase;
@@ -20,6 +21,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.StreamCorruptedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +50,7 @@ public class MainFrame extends JFrame {
 	private Settings settings;
 	private Synchronizer synchronizer;
 
-	char[] password;
+	private Crypto crypto;
 
 	public MainFrame() {
 		settings = new Settings();
@@ -84,7 +86,7 @@ public class MainFrame extends JFrame {
 	}
 
 	public void loadDatabase(File databaseFile) {
-		database = new AccountsDatabase(databaseFile);
+		database = new AccountsDatabase(databaseFile, crypto);
 
 		if (database.isLocked()) {
 			int dialog = JOptionPane.showConfirmDialog(this, "Файл либо уже открыт, либо программа была некорректно завершена. " +
@@ -97,6 +99,8 @@ public class MainFrame extends JFrame {
 
 		try {
 			database.open();
+		} catch (StreamCorruptedException e) {
+			showError("Неправильный пароль");
 		} catch (Exception e) {
 			showError("Не удалось открыть файл");
 		}
@@ -335,7 +339,7 @@ public class MainFrame extends JFrame {
 			try {
 				syncFile = synchronizer.load(file);
 			} catch (SyncException e) {
-				showError(e.getMessage());
+				showWarning(e.getMessage());
 			}
 
 			if (syncFile != null) {
@@ -375,15 +379,14 @@ public class MainFrame extends JFrame {
 			} catch (IOException e1) {
 				showError("Не удалось записать данные в файл");
 			} catch (SyncException e) {
-				// todo: показать в status bar
-				showError(e.getMessage());
+				showWarning(e.getMessage());
 			}
 
 			if (synchronizer != null) {
 				try {
 					synchronizer.save(database.getFile());
 				} catch (SyncException e) {
-					showError(e.getMessage());
+					showWarning(e.getMessage());
 				}
 			}
 
@@ -438,7 +441,7 @@ public class MainFrame extends JFrame {
 			return false;
 		}
 
-		password = password;
+		crypto = new Crypto(password);
 
 		return true;
 	}

@@ -1,7 +1,11 @@
 package jkeypass.models;
 
+import jkeypass.common.Crypto;
 import jkeypass.sync.SyncException;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import java.io.*;
 import java.util.ArrayList;
 
@@ -9,11 +13,14 @@ public class AccountsDatabase {
 	private File file;
 	private File lockFile;
 	private boolean open = false;
+	private Crypto crypto;
 
 	private ArrayList<Account> list = new ArrayList<>();
 
-	public AccountsDatabase(File file) {
+	public AccountsDatabase(File file, Crypto crypto) {
 		this.file = file;
+		this.crypto = crypto;
+
 		lockFile = new File(file.getParent(), file.getName() + ".lock");
 	}
 
@@ -47,18 +54,21 @@ public class AccountsDatabase {
 
 	public void open() throws IOException, ClassNotFoundException {
 		if (file.length() > 0) {
-			try (ObjectInputStream objectStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+			try (
+					BufferedInputStream is = new BufferedInputStream(new FileInputStream(file));
+					CipherInputStream cis = new CipherInputStream(is, crypto.getCipher(Cipher.DECRYPT_MODE));
+					ObjectInputStream stream = new ObjectInputStream(cis)
+			) {
 				Account account;
 
 				try {
-					while ((account = (Account) objectStream.readObject()) != null) {
+					while ((account = (Account) stream.readObject()) != null) {
 						add(account);
 					}
-				} catch (IOException e) {
-					// e.printStackTrace(); todo: корректно обработать
+				} catch (IOException ignored) {
 				}
 
-				objectStream.close();
+				stream.close();
 			}
 		}
 
@@ -69,11 +79,18 @@ public class AccountsDatabase {
 	public void save() throws IOException, SyncException {
 		if (open) {
 			// очистка произойдет автоматически, так как FileOutputStream сконструирован с append = false
-			try (ObjectOutputStream objectStream = new ObjectOutputStream(new FileOutputStream(file))) {
+			try (
+					BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(file));
+					CipherOutputStream cos = new CipherOutputStream(os, crypto.getCipher(Cipher.ENCRYPT_MODE));
+					ObjectOutputStream stream = new ObjectOutputStream(cos)
+			) {
 				for (Account account : list) {
-					objectStream.writeObject(account);
+					stream.writeObject(account);
+
+
 				}
-				objectStream.close();
+
+				stream.close();
 			}
 		}
 	}
@@ -86,11 +103,11 @@ public class AccountsDatabase {
 		return lockFile.exists();
 	}
 
-	private void lock() throws IOException {
-		lockFile.createNewFile();
+	private boolean lock() throws IOException {
+		return lockFile.createNewFile();
 	}
 
-	private void unlock() throws IOException {
-		lockFile.delete();
+	private boolean unlock() throws IOException {
+		return lockFile.delete();
 	}
 }
