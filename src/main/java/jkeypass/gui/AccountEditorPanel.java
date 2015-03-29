@@ -69,7 +69,7 @@ public class AccountEditorPanel extends JPanel {
 				BorderFactory.createTitledBorder("Аккаунт"),
 				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
-		createInputs();
+		inputs();
 	}
 
 	public Account getUpdatedAccount() {
@@ -88,14 +88,14 @@ public class AccountEditorPanel extends JPanel {
 		return account;
 	}
 
-	private void createInputs() {
+	private void inputs() {
 		int i = 0;
 
 		for (Field field : new Field[]{Field.NAME, Field.URL, Field.LOGIN}) {
-			add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
+			add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.gbc(0, i));
 
 			JTextField inputField = new JTextField((String) getAccountProperty(field.getter), 10);
-			add(inputField, GridBagLayoutHelper.createGbc(1, i));
+			add(inputField, GridBagLayoutHelper.gbc(1, i));
 
 			fieldMap.put(field, inputField);
 
@@ -107,7 +107,7 @@ public class AccountEditorPanel extends JPanel {
 		i++;
 		field = Field.PASSWORD;
 
-		add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
+		add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.gbc(0, i));
 
 		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
@@ -129,28 +129,28 @@ public class AccountEditorPanel extends JPanel {
 		});
 
 		passwordPanel.add(showPasswordButton);
-		add(passwordPanel, GridBagLayoutHelper.createGbc(1, i));
+		add(passwordPanel, GridBagLayoutHelper.gbc(1, i));
 
 		fieldMap.put(field, passwordField);
 
 		i++;
 		GridBagConstraints gbc = new GridBagConstraints(0, i, 2, 1, 0.1, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 0, 5, 5), 0, 0);
-		JPanel generator = createPasswordGeneratorPanel();
+		JPanel generator = passwordGeneratorPanel();
 		add(generator, gbc);
 
 		i++;
 		field = Field.DESCRIPTION;
 
-		add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
+		add(new JLabel(field.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.gbc(0, i));
 
 		JTextArea textArea = new JTextArea((String) getAccountProperty(field.getter), 6, 20);
 		textArea.setLineWrap(true);
-		add(new JScrollPane(textArea), GridBagLayoutHelper.createGbc(1, i));
+		add(new JScrollPane(textArea), GridBagLayoutHelper.gbc(1, i));
 
 		fieldMap.put(field, textArea);
 	}
 
-	private JPanel createPasswordGeneratorPanel() {
+	private JPanel passwordGeneratorPanel() {
 		final Map<SymbolType, JCheckBox> symbolsCheckboxes = new HashMap<>();
 
 		JPanel typesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));

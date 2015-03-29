@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainFrame extends JFrame {
+	private final String APP_NAME = "j-key-pass";
+
 	enum Action {
 		CREATE_FILE_ACTION,
 		OPEN_FILE_ACTION,
@@ -70,19 +72,57 @@ public class MainFrame extends JFrame {
 
 		applySettings();
 
-		grid = createGrid();
+		grid = grid();
 		add(new JScrollPane(grid));
 
 		initActions();
 
-		JMenuBar menuBar = createMenu();
+		JMenuBar menuBar = menuBar();
 		setJMenuBar(menuBar);
 
-		JToolBar toolBar = createToolBar();
+		JToolBar toolBar = toolBar();
 		add((new JPanel(new FlowLayout(FlowLayout.LEFT))).add(toolBar), BorderLayout.NORTH);
 
 		statusBar = new StatusBar(this);
 		add(statusBar, BorderLayout.SOUTH);
+
+		setTrayIcon();
+	}
+
+	private void setTrayIcon() {
+		if (!SystemTray.isSupported()) {
+			System.out.println("SystemTray is not supported");
+			return;
+		}
+
+		Resources resources = new Resources();
+
+		TrayIcon icon = new TrayIcon(resources.getImage("tray.png"), APP_NAME);
+		icon.setImageAutoSize(true);
+
+		icon.setPopupMenu(trayMenu());
+//
+//		final JPopupMenu popup = trayMenu();
+//
+//
+//		icon.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseReleased(MouseEvent e) {
+//				if (e.isPopupTrigger()) {
+//					popup.setLocation(e.getX(), e.getY());
+//					popup.setInvoker(popup);
+//					popup.setVisible(true);
+//				}
+//			}
+//		});
+
+		SystemTray tray = SystemTray.getSystemTray();
+
+		try {
+			tray.add(icon);
+		} catch (AWTException e) {
+			System.out.println("TrayIcon could not be added.");
+		}
 	}
 
 	public void loadDatabase(File databaseFile) {
@@ -112,7 +152,7 @@ public class MainFrame extends JFrame {
 
 	@Override
 	public String getTitle() {
-		String title = "j-key-pass";
+		String title = APP_NAME;
 
 		if (database != null) {
 			title += " - " + database.getFile().getPath();
@@ -121,7 +161,7 @@ public class MainFrame extends JFrame {
 		return title;
 	}
 
-	private JTable createGrid() {
+	private JTable grid() {
 		final JTable grid = new JTable();
 
 		grid.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -219,7 +259,77 @@ public class MainFrame extends JFrame {
 		return grid;
 	}
 
-	private JMenuBar createMenu() {
+	private PopupMenu trayMenu() {
+		class MenuActionListener implements ActionListener {
+			private AbstractAction action;
+			
+			public MenuActionListener(AbstractAction action) {
+				this.action = action;
+			}
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				action.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+			}
+		}
+
+		PopupMenu popup = new PopupMenu();
+		MenuItem item;
+		
+		AbstractAction action;
+
+		action = actions.get(Action.CREATE_FILE_ACTION);
+		item = new MenuItem((String) action.getValue(javax.swing.Action.NAME));
+		item.addActionListener(new MenuActionListener(action));
+		popup.add(item);
+
+		action = actions.get(Action.OPEN_FILE_ACTION);
+		item = new MenuItem((String) action.getValue(javax.swing.Action.NAME));
+		item.addActionListener(new MenuActionListener(action));
+		popup.add(item);
+
+		action = actions.get(Action.SAVE_FILE_ACTION);
+		item = new MenuItem((String) action.getValue(javax.swing.Action.NAME));
+		item.addActionListener(new MenuActionListener(action));
+		popup.add(item);
+
+		action = actions.get(Action.SETTINGS_ACTION);
+		item = new MenuItem((String) action.getValue(javax.swing.Action.NAME));
+		item.addActionListener(new MenuActionListener(action));
+		popup.add(item);
+
+		popup.addSeparator();
+
+		action = actions.get(Action.EXIT_ACTION);
+		item = new MenuItem((String) action.getValue(javax.swing.Action.NAME));
+		item.addActionListener(new MenuActionListener(action));
+		popup.add(item);
+
+		return popup;
+	}
+
+//	private JPopupMenu trayMenu2() {
+//		JPopupMenu popup = new JPopupMenu();
+//
+//		Action action = Action.CREATE_FILE_ACTION);
+//		popup.add(actions.get();
+//
+//		popup.add(actions.get(Action.OPEN_FILE_ACTION));
+//
+//		popup.add(actions.get(Action.SAVE_FILE_ACTION));
+//
+//		popup.addSeparator();
+//
+//		popup.add(actions.get(Action.SETTINGS_ACTION));
+//
+//		popup.addSeparator();
+//
+//		popup.add(actions.get(Action.EXIT_ACTION));
+//
+//		return popup;
+//	}
+
+	private JMenuBar menuBar() {
 		JMenu fileMenu = new JMenu("Файл");
 
 		JMenuItem item;
@@ -269,7 +379,7 @@ public class MainFrame extends JFrame {
 		return bar;
 	}
 
-	private JToolBar createToolBar() {
+	private JToolBar toolBar() {
 		JToolBar bar = new JToolBar();
 		bar.setFloatable(false);
 

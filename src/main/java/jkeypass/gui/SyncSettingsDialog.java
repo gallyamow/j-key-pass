@@ -27,7 +27,7 @@ public class SyncSettingsDialog extends JDialog {
 
 		add((JComponent) panel);
 
-		add(createButtons(), BorderLayout.SOUTH);
+		add(buttons(), BorderLayout.SOUTH);
 
 		pack();
 		setResizable(false);
@@ -45,7 +45,7 @@ public class SyncSettingsDialog extends JDialog {
 		settings.save();
 	}
 
-	private JPanel createButtons() {
+	private JPanel buttons() {
 		JPanel buttonPanel = new JPanel();
 
 		JButton saveButton = new JButton("Сохранить");
