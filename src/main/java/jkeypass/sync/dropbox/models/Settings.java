@@ -2,7 +2,7 @@ package jkeypass.sync.dropbox.models;
 
 import java.util.prefs.Preferences;
 
-public class DropboxSettings implements jkeypass.common.Settings {
+public class Settings implements jkeypass.common.Settings {
 	public enum Options {
 		KEY("App key", "dropboxKey"),
 		SECRET("App secret", "dropboxSecret"),
@@ -31,7 +31,7 @@ public class DropboxSettings implements jkeypass.common.Settings {
 
 	private Preferences preferences;
 
-	public DropboxSettings() {
+	public Settings() {
 		preferences = Preferences.userRoot().node("j-key-pass").node("dropbox");
 
 		initParams();

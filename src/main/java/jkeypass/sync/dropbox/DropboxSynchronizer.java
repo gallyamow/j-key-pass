@@ -14,9 +14,15 @@ import java.util.Locale;
 
 public class DropboxSynchronizer implements Synchronizer {
 	private DbxClient client;
+	
+	private String key;
+	private String secret;
 
 	public DropboxSynchronizer(String key, String secret, String token) {
 		DbxRequestConfig config = new DbxRequestConfig("j-key-pass", Locale.getDefault().toString());
+		
+		this.key = key;
+		this.secret = secret;
 
 		client = new DbxClient(config, token);
 	}
@@ -37,8 +43,6 @@ public class DropboxSynchronizer implements Synchronizer {
 
 	public File load(File databaseFile) throws SyncException {
 		File dropboxFile = new File(databaseFile.getParent(), databaseFile.getName() + ".dropbox");
-
-//		File dropboxFile = File.createTempFile("dropbox", "dropbox");
 
 		try {
 			try (FileOutputStream outputStream = new FileOutputStream(dropboxFile)) {

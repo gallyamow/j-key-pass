@@ -1,10 +1,8 @@
 package jkeypass.sync;
 
-import jkeypass.common.Settings;
-import jkeypass.common.SettingsPanel;
 import jkeypass.sync.dropbox.DropboxSynchronizer;
-import jkeypass.sync.dropbox.gui.DropboxSettingsPanel;
-import jkeypass.sync.dropbox.models.DropboxSettings;
+import jkeypass.sync.dropbox.gui.SettingsPanel;
+import jkeypass.sync.dropbox.models.Settings;
 
 public class Sync {
 	public enum Method {
@@ -48,30 +46,30 @@ public class Sync {
 
 		switch (method) {
 			case DROPBOX:
-				DropboxSettings settings = new DropboxSettings();
+				Settings settings = new Settings();
 				return new DropboxSynchronizer(settings.getKey(), settings.getSecret(), settings.getToken());
 		}
 
 		return null;
 	}
 
-	public static Settings getSettings(String methodName) {
+	public static jkeypass.common.Settings getSettings(String methodName) {
 		Method method = Method.getByName(methodName);
 
 		switch (method) {
 			case DROPBOX:
-				return new DropboxSettings();
+				return new Settings();
 		}
 
 		return null;
 	}
 
-	public static SettingsPanel getSettingsPanel(String methodName, Settings settings) {
+	public static jkeypass.common.SettingsPanel getSettingsPanel(String methodName, jkeypass.common.Settings settings) {
 		Method method = Method.getByName(methodName);
 
 		switch (method) {
 			case DROPBOX:
-				return new DropboxSettingsPanel(settings);
+				return new SettingsPanel(settings);
 		}
 
 		return null;
