@@ -58,15 +58,7 @@ public class MainFrame extends JFrame {
 		settings = new Settings();
 		synchronizer = Sync.getSynchronizer(settings.getSyncMethod());
 
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				super.windowClosing(e);
-				close();
-			}
-		});
+		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
 		setSize(640, 480);
 
@@ -87,6 +79,17 @@ public class MainFrame extends JFrame {
 		add(statusBar, BorderLayout.SOUTH);
 
 		setTrayIcon();
+
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				hideWindow();
+			}
+			@Override
+			public void windowIconified(WindowEvent e) {
+				hideWindow();
+			}
+		});
 	}
 
 	private void setTrayIcon() {
@@ -97,10 +100,17 @@ public class MainFrame extends JFrame {
 
 		Resources resources = new Resources();
 
-		TrayIcon icon = new TrayIcon(resources.getImage("tray.png"), APP_NAME);
+		TrayIcon icon = new TrayIcon(resources.getImage("tray.png"), APP_NAME, trayMenu());
 		icon.setImageAutoSize(true);
 
-		icon.setPopupMenu(trayMenu());
+		icon.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					restoreWindow();
+				}
+			}
+		});
 
 		SystemTray tray = SystemTray.getSystemTray();
 
@@ -109,6 +119,16 @@ public class MainFrame extends JFrame {
 		} catch (AWTException e) {
 			System.out.println("TrayIcon could not be added.");
 		}
+	}
+
+	private void hideWindow() {
+		setVisible(false);
+	}
+	
+	private void restoreWindow() {
+		setVisible(true);
+		setExtendedState(getExtendedState() & (JFrame.ICONIFIED ^ 0xFFFF));
+		requestFocus();
 	}
 
 	public void loadDatabase(File databaseFile) {
@@ -248,20 +268,21 @@ public class MainFrame extends JFrame {
 	private PopupMenu trayMenu() {
 		class MenuActionListener implements ActionListener {
 			private AbstractAction action;
-			
+
 			public MenuActionListener(AbstractAction action) {
 				this.action = action;
 			}
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				restoreWindow();
 				action.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
 			}
 		}
 
 		PopupMenu popup = new PopupMenu();
 		MenuItem item;
-		
+
 		AbstractAction action;
 
 		action = actions.get(Action.CREATE_FILE_ACTION);
