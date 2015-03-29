@@ -3,6 +3,7 @@ package jkeypass.gui;
 import jkeypass.common.Config;
 import jkeypass.common.Crypto;
 import jkeypass.common.Resources;
+import jkeypass.importation.ImportException;
 import jkeypass.models.Account;
 import jkeypass.models.AccountsDatabase;
 import jkeypass.models.AccountsTableModel;
@@ -36,6 +37,8 @@ public class MainFrame extends JFrame {
 		CREATE_ACCOUNT_ACTION,
 		EDIT_ACCOUNT_ACTION,
 		REMOVE_ACCOUNT_ACTION,
+
+		IMPORT_ACTION,
 
 		SETTINGS_ACTION,
 		EXIT_ACTION
@@ -85,6 +88,7 @@ public class MainFrame extends JFrame {
 			public void windowClosing(WindowEvent e) {
 				hideWindow();
 			}
+
 			@Override
 			public void windowIconified(WindowEvent e) {
 				hideWindow();
@@ -124,7 +128,7 @@ public class MainFrame extends JFrame {
 	private void hideWindow() {
 		setVisible(false);
 	}
-	
+
 	private void restoreWindow() {
 		setVisible(true);
 		setExtendedState(getExtendedState() & (JFrame.ICONIFIED ^ 0xFFFF));
@@ -275,7 +279,10 @@ public class MainFrame extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				restoreWindow();
+				if (!(action instanceof ExitAction)) {
+					restoreWindow();
+				}
+
 				action.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
 			}
 		}
@@ -331,6 +338,10 @@ public class MainFrame extends JFrame {
 		item = new JMenuItem(actions.get(Action.SAVE_FILE_ACTION));
 		item.setAccelerator(KeyStroke.getKeyStroke("ctrl S"));
 		fileMenu.add(item);
+
+		fileMenu.addSeparator();
+
+		fileMenu.add(actions.get(Action.IMPORT_ACTION));
 
 		fileMenu.addSeparator();
 
@@ -399,7 +410,10 @@ public class MainFrame extends JFrame {
 		actions.put(Action.REMOVE_ACCOUNT_ACTION, new RemoveAccountAction("Удалить выбранную запись",
 				resources.getIcon("remove-account.png")));
 
-		actions.put(Action.SETTINGS_ACTION, new SettingsAction("Настройки", resources.getIcon("settings.png")));
+		actions.put(Action.IMPORT_ACTION, new SettingsAction("Настройки", resources.getIcon("settings.png")));
+
+		actions.put(Action.SETTINGS_ACTION, new ImportAction("Импортировать", resources.getIcon("import.png")));
+
 		actions.put(Action.EXIT_ACTION, new ExitAction("Закрыть программу", resources.getIcon("exit.png")));
 
 		refreshEnabledActions();
@@ -710,6 +724,29 @@ public class MainFrame extends JFrame {
 			if (dialog.showDialog() == SettingsDialog.SAVE_OPTION) {
 				applySettings();
 			}
+		}
+	}
+
+	private class ImportAction extends AbstractAction {
+		public ImportAction(String name, Icon icon) {
+			super(name, icon);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent event) {
+			ImportDialog dialog = new ImportDialog(MainFrame.this, "Импорт");
+			dialog.setLocationRelativeTo(MainFrame.this);
+
+			if (dialog.showDialog() == ImportDialog.IMPORT_OPTION) {
+				try {
+					dialog.doImport(database);
+				} catch (ImportException e) {
+					showError(e.getMessage());
+				}
+			}
+
+			save();
+			refreshGrid();
 		}
 	}
 
