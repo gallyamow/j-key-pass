@@ -101,20 +101,6 @@ public class MainFrame extends JFrame {
 		icon.setImageAutoSize(true);
 
 		icon.setPopupMenu(trayMenu());
-//
-//		final JPopupMenu popup = trayMenu();
-//
-//
-//		icon.addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseReleased(MouseEvent e) {
-//				if (e.isPopupTrigger()) {
-//					popup.setLocation(e.getX(), e.getY());
-//					popup.setInvoker(popup);
-//					popup.setVisible(true);
-//				}
-//			}
-//		});
 
 		SystemTray tray = SystemTray.getSystemTray();
 
@@ -307,27 +293,6 @@ public class MainFrame extends JFrame {
 
 		return popup;
 	}
-
-//	private JPopupMenu trayMenu2() {
-//		JPopupMenu popup = new JPopupMenu();
-//
-//		Action action = Action.CREATE_FILE_ACTION);
-//		popup.add(actions.get();
-//
-//		popup.add(actions.get(Action.OPEN_FILE_ACTION));
-//
-//		popup.add(actions.get(Action.SAVE_FILE_ACTION));
-//
-//		popup.addSeparator();
-//
-//		popup.add(actions.get(Action.SETTINGS_ACTION));
-//
-//		popup.addSeparator();
-//
-//		popup.add(actions.get(Action.EXIT_ACTION));
-//
-//		return popup;
-//	}
 
 	private JMenuBar menuBar() {
 		JMenu fileMenu = new JMenu("Файл");
