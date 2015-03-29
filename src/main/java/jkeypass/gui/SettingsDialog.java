@@ -25,7 +25,7 @@ public class SettingsDialog extends JDialog {
 		panel = new SettingsPanel(settings);
 		add(panel);
 
-		add(createButtons(), BorderLayout.SOUTH);
+		add(buttons(), BorderLayout.SOUTH);
 
 		setResizable(false);
 		setLocationByPlatform(true);
@@ -43,7 +43,7 @@ public class SettingsDialog extends JDialog {
 		settings.save();
 	}
 
-	private JPanel createButtons() {
+	private JPanel buttons() {
 		JPanel buttonPanel = new JPanel();
 
 		JButton saveButton = new JButton("Сохранить");

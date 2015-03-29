@@ -24,13 +24,13 @@ public class PasswordDialog extends JDialog {
 		
 		int i = 0;
 		
-		panel.add(new JLabel(title), GridBagLayoutHelper.createGbc(0, ++i));
+		panel.add(new JLabel(title), GridBagLayoutHelper.gbc(0, ++i));
 		
 		passwordField = new JPasswordField();
-		panel.add(passwordField, GridBagLayoutHelper.createGbc(0, ++i));
+		panel.add(passwordField, GridBagLayoutHelper.gbc(0, ++i));
 
 		add(panel);
-		add(createButtons(), BorderLayout.SOUTH);
+		add(buttons(), BorderLayout.SOUTH);
 
 		setLocationByPlatform(true);
 		setResizable(false);
@@ -48,7 +48,7 @@ public class PasswordDialog extends JDialog {
 		return passwordField.getPassword();
 	}
 
-	private JPanel createButtons() {
+	private JPanel buttons() {
 		JPanel buttonPanel = new JPanel();
 
 		JButton saveButton = new JButton("Ok");

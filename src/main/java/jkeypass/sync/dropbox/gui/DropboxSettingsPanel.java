@@ -22,19 +22,19 @@ public class DropboxSettingsPanel extends JPanel implements jkeypass.common.Sett
 		setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
 		int i = 0;
-		add(new JLabel(DropboxSettings.Options.KEY.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
+		add(new JLabel(DropboxSettings.Options.KEY.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.gbc(0, i));
 		keyField = new JTextField(settings.getKey());
-		add(keyField, GridBagLayoutHelper.createGbc(1, i));
+		add(keyField, GridBagLayoutHelper.gbc(1, i));
 
 		i++;
-		add(new JLabel(DropboxSettings.Options.SECRET.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
+		add(new JLabel(DropboxSettings.Options.SECRET.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.gbc(0, i));
 		secretField = new JTextField(settings.getSecret());
-		add(secretField, GridBagLayoutHelper.createGbc(1, i));
+		add(secretField, GridBagLayoutHelper.gbc(1, i));
 
 		i++;
-		add(new JLabel(DropboxSettings.Options.TOKEN.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, i));
+		add(new JLabel(DropboxSettings.Options.TOKEN.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.gbc(0, i));
 		tokenField = new JTextArea(settings.getToken(), 3, 30);
-		add(tokenField, GridBagLayoutHelper.createGbc(1, i));
+		add(tokenField, GridBagLayoutHelper.gbc(1, i));
 	}
 
 	@Override

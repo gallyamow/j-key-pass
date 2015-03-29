@@ -26,7 +26,7 @@ public class SettingsPanel extends JPanel implements jkeypass.common.SettingsPan
 
 		int i = 0;
 
-		createThemeBox(++i);
+		themeBox(++i);
 		createSyncBox(++i);
 	}
 
@@ -41,8 +41,8 @@ public class SettingsPanel extends JPanel implements jkeypass.common.SettingsPan
 		return settings;
 	}
 
-	private void createThemeBox(int rowIndex) {
-		add(new JLabel(Settings.Options.THEME.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, rowIndex));
+	private void themeBox(int rowIndex) {
+		add(new JLabel(Settings.Options.THEME.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.gbc(0, rowIndex));
 
 		themeBox = new JComboBox<>();
 
@@ -75,7 +75,7 @@ public class SettingsPanel extends JPanel implements jkeypass.common.SettingsPan
 
 		themeBox.setSelectedItem(selected);
 
-		add(themeBox, GridBagLayoutHelper.createGbc(1, rowIndex));
+		add(themeBox, GridBagLayoutHelper.gbc(1, rowIndex));
 	}
 
 	private void createSyncBox(int rowIndex) {
@@ -126,7 +126,7 @@ public class SettingsPanel extends JPanel implements jkeypass.common.SettingsPan
 		container.add(syncMethodBox);
 		container.add(syncSettingsButton);
 
-		add(new JLabel(Settings.Options.SYNC_METHOD.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.createGbc(0, rowIndex));
-		add(container, GridBagLayoutHelper.createGbc(1, rowIndex));
+		add(new JLabel(Settings.Options.SYNC_METHOD.getLabel() + ":", JLabel.LEFT), GridBagLayoutHelper.gbc(0, rowIndex));
+		add(container, GridBagLayoutHelper.gbc(1, rowIndex));
 	}
 }

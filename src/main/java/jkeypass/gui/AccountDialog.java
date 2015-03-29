@@ -21,7 +21,7 @@ public class AccountDialog extends JDialog {
 		panel = new AccountEditorPanel(account);
 		add(panel);
 
-		add(createButtons(), BorderLayout.SOUTH);
+		add(buttons(), BorderLayout.SOUTH);
 
 		setLocationByPlatform(true);
 		pack();
@@ -37,7 +37,7 @@ public class AccountDialog extends JDialog {
 		return panel.getUpdatedAccount();
 	}
 
-	private JPanel createButtons() {
+	private JPanel buttons() {
 		JPanel buttonPanel = new JPanel();
 
 		JButton saveButton = new JButton("Сохранить");
