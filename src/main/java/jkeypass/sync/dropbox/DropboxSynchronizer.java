@@ -1,65 +1,68 @@
 package jkeypass.sync.dropbox;
 
-import com.dropbox.core.DbxClient;
 import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.DbxWriteMode;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.DownloadErrorException;
+import com.dropbox.core.v2.files.WriteMode;
 import jkeypass.sync.SyncException;
 import jkeypass.sync.Synchronizer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Locale;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
 
-public class DropboxSynchronizer implements Synchronizer {
-	private DbxClient client;
-	
-	private String key;
-	private String secret;
+public final class DropboxSynchronizer implements Synchronizer {
+	private final DbxClientV2 client;
 
-	public DropboxSynchronizer(String key, String secret, String token) {
-		DbxRequestConfig config = new DbxRequestConfig("j-key-pass", Locale.getDefault().toString());
-		
-		this.key = key;
-		this.secret = secret;
-
-		client = new DbxClient(config, token);
+	public DropboxSynchronizer(String accessToken) {
+		DbxRequestConfig config = DbxRequestConfig.newBuilder("j-key-pass").build();
+		client = new DbxClientV2(config, accessToken);
 	}
 
-	public void save(File databaseFile) throws SyncException {
-		try {
-			try (FileInputStream inputStream = new FileInputStream(databaseFile)) {
-				try {
-					client.uploadFile(getFilePathOnDropbox(databaseFile), DbxWriteMode.force(), databaseFile.length(), inputStream);
-				} catch (Exception e) {
-					throw new SyncException("Не удалось сохранить файл в удаленное хранилище", e);
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+	@Override
+	public void save(Path localFile) throws SyncException {
+		try (InputStream in = Files.newInputStream(localFile)) {
+			client.files()
+					.uploadBuilder(remotePath(localFile))
+					.withMode(WriteMode.OVERWRITE)
+					.uploadAndFinish(in);
+		} catch (Exception e) {
+			throw new SyncException("Не удалось сохранить файл в удалённое хранилище", e);
 		}
 	}
 
-	public File load(File databaseFile) throws SyncException {
-		File dropboxFile = new File(databaseFile.getParent(), databaseFile.getName() + ".dropbox");
+	@Override
+	public Optional<Path> load(Path localFile) throws SyncException {
+		Path tempFile = localFile.resolveSibling(localFile.getFileName() + ".dropbox");
 
-		try {
-			try (FileOutputStream outputStream = new FileOutputStream(dropboxFile)) {
-				try {
-					client.getFile(getFilePathOnDropbox(databaseFile), null, outputStream);
-				} catch (Exception e) {
-					throw new SyncException("Не удалось загрузить файл из удаленного хранилища", e);
-				}
+		try (OutputStream out = Files.newOutputStream(tempFile)) {
+			client.files()
+					.downloadBuilder(remotePath(localFile))
+					.download(out);
+			return Optional.of(tempFile);
+		} catch (DownloadErrorException e) {
+			deleteQuietly(tempFile);
+			if (e.errorValue.isPath() && e.errorValue.getPathValue().isNotFound()) {
+				return Optional.empty();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+			throw new SyncException("Не удалось загрузить файл из удалённого хранилища", e);
+		} catch (Exception e) {
+			deleteQuietly(tempFile);
+			throw new SyncException("Не удалось загрузить файл из удалённого хранилища", e);
 		}
-
-		return dropboxFile;
 	}
 
-	private String getFilePathOnDropbox(File file) {
-		return "/" + file.getName();
+	private String remotePath(Path localFile) {
+		return "/" + localFile.getFileName();
+	}
+
+	private void deleteQuietly(Path file) {
+		try {
+			Files.deleteIfExists(file);
+		} catch (IOException ignored) {
+		}
 	}
 }

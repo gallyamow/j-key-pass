@@ -1,25 +1,17 @@
 package jkeypass;
 
-import jkeypass.gui.MainFrame;
+import jkeypass.ui.MainFrame;
 
 import javax.swing.*;
-import java.io.File;
 
-public class Application {
-	private File databaseFile;
+public final class Application {
+	public static final String APP_NAME = "j-key-pass";
+	public static final String DATABASE_EXTENSION = "jkp";
 
-	public static void main(String[] args) {
-		Application application = new Application();
-		application.run();
+	private Application() {
 	}
 
-	public void run() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				MainFrame mainFrame = new MainFrame();
-				mainFrame.setVisible(true);
-			}
-		});
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
 	}
 }

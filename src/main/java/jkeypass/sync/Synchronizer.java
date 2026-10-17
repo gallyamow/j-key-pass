@@ -1,9 +1,14 @@
 package jkeypass.sync;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.util.Optional;
 
 public interface Synchronizer {
-	public void save(File databaseFile) throws SyncException;
+	void save(Path localFile) throws SyncException;
 
-	public File load(File databaseFile) throws SyncException;
+	/**
+	 * Downloads the remote copy into a temporary file next to the local one.
+	 * Returns empty if there is no remote copy yet.
+	 */
+	Optional<Path> load(Path localFile) throws SyncException;
 }
